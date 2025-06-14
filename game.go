@@ -24,6 +24,7 @@ func (game *Game) Draw(screen *ebiten.Image) {
 
 	for _, card := range game.cards {
 		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(3, 3)
 		op.GeoM.Translate(float64(card.X), float64(card.Y))
 		img := assets.Cards[card.Suit][card.Value]
 		screen.DrawImage(img, op)
