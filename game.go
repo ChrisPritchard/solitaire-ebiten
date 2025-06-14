@@ -37,7 +37,7 @@ func (game *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func NewGame() *Game {
 
 	cards := make([]Card, 0)
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		for j := 2; j <= 14; j++ {
 			card := Card{X: 10 + i*50 + j*5, Y: 10 + j*10, Suit: i, Value: j}
 			cards = append(cards, card)
