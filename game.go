@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"image"
+	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,7 +16,8 @@ type Card struct {
 }
 
 type Game struct {
-	cards []Card
+	cards      []Card
+	background *ebiten.Image
 }
 
 func (game *Game) Update() error {
@@ -23,6 +25,8 @@ func (game *Game) Update() error {
 }
 
 func (game *Game) Draw(screen *ebiten.Image) {
+	screen.DrawImage(game.background, nil)
+
 	for _, card := range game.cards {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(card.X), float64(card.Y))
@@ -34,21 +38,22 @@ func (game *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
-func NewGame() *Game {
-	cards := make([]Card, 0)
+func NewGame(card_data []byte, background_data []byte) *Game {
 
-	file, err := os.Open("./assets/clubs-ace.png")
+	background_image, _, err := image.Decode(bytes.NewReader(background_data))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
+	background := ebiten.NewImageFromImage(background_image)
+
+	cards_image, _, err := image.Decode(bytes.NewReader(card_data))
 	if err != nil {
 		log.Fatal(err)
 	}
-	img2 := ebiten.NewImageFromImage(img)
-	card := Card{X: 100, Y: 100, Image: img2}
-	cards = append(cards, card)
+	cards_image2 := ebiten.NewImageFromImage(cards_image)
 
-	return &Game{cards}
+	card := Card{X: 100, Y: 100, Image: cards_image2}
+	cards := []Card{card}
+
+	return &Game{cards, background}
 }
