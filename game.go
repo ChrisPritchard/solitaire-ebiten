@@ -1,23 +1,18 @@
 package main
 
 import (
-	"bytes"
-	"image"
-	_ "image/jpeg"
-	_ "image/png"
-	"log"
+	"github.com/chrispritchard/solitaire-ebiten/assets"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Card struct {
-	X, Y  int
-	Image *ebiten.Image
+	X, Y        int
+	Suit, Value int
 }
 
 type Game struct {
-	cards      []Card
-	background *ebiten.Image
+	cards []Card
 }
 
 func (game *Game) Update() error {
@@ -25,12 +20,13 @@ func (game *Game) Update() error {
 }
 
 func (game *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(game.background, nil)
+	screen.DrawImage(assets.Background, nil)
 
 	for _, card := range game.cards {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(card.X), float64(card.Y))
-		screen.DrawImage(card.Image, op)
+		img := assets.Cards[card.Suit][card.Value]
+		screen.DrawImage(img, op)
 	}
 }
 
@@ -38,22 +34,15 @@ func (game *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
-func NewGame(card_data []byte, background_data []byte) *Game {
+func NewGame() *Game {
 
-	background_image, _, err := image.Decode(bytes.NewReader(background_data))
-	if err != nil {
-		log.Fatal(err)
+	cards := make([]Card, 0)
+	for i := 0; i < 4; i++ {
+		for j := 2; j <= 14; j++ {
+			card := Card{X: 10 + i*50 + j*5, Y: 10 + j*10, Suit: i, Value: j}
+			cards = append(cards, card)
+		}
 	}
-	background := ebiten.NewImageFromImage(background_image)
 
-	cards_image, _, err := image.Decode(bytes.NewReader(card_data))
-	if err != nil {
-		log.Fatal(err)
-	}
-	cards_image2 := ebiten.NewImageFromImage(cards_image)
-
-	card := Card{X: 100, Y: 100, Image: cards_image2}
-	cards := []Card{card}
-
-	return &Game{cards, background}
+	return &Game{cards}
 }
