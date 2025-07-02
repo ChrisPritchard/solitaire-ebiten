@@ -3,7 +3,7 @@
 There are two overall approaches to card management:
 
 - every card has an x,y and maybe z, and are dumbly rendered accordingly. game rules with stacks, tableaus etc is not represented in the state directly but instead in allowable actions and consequences. some additional state data might be required, like origin for moved cards
-- cards are not objects at all, but instead each section of the board is represented as an array or nilable property. the only dynamic thing is anything being moved, or floated which might require aditional data be kept like origin.
+- cards are not objects at all, but instead each section of the board is represented as an array or nilable property. the only dynamic thing is anything being moved, or floated which might require additional data be kept like origin.
 
 i think cards will either need to track what is stacked on them, or perhaps moveable stacks will need to exist as an object. this is to facilitate not just moving the bottom or free card of any stack, but in the case of the tableau piles, the ability to move the top most card where all stacked cards follow stacking rules.
 
@@ -20,3 +20,13 @@ rules can be described as an object with a few methods maybe. board setup, can d
 - as the player drags, the moving card and all valid stacked are also moved
 - if the player releases, check if it can be stacked in place. if not issue move orders back to position
 - check victory conditions as appropriate
+
+## dragging/mouse clicks
+
+I want to support both mouse and touch inputs, which work differently in ebiten. To do this I need to track:
+
+- whether these are pressed, or released
+- the current state of a drag action
+- if just pressed, is there a card that can be moved? if so, memorise it
+- on updates, if the drag position has moved, then move the moving card
+- on release, determine if the card can be placed there, if so place it, else snap back to its original position
