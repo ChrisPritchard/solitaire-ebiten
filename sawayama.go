@@ -28,15 +28,37 @@ const (
 )
 
 type SawayamaRules struct {
-	cards []Card
-	state gamestate
+	cards   []Card
+	state   gamestate
+	dragged *Card
 }
 
-func (r *SawayamaRules) Update(touchState TouchState) error {
+func (r *SawayamaRules) Update(ts TouchState) error {
 	switch r.state {
 	case shuffling:
 		r.cards = shuffle_deck()
 		r.state = dealing
+	default:
+		if ts.Pressed && r.dragged == nil {
+			// detect if card under cursor
+			var card *Card = nil
+			for i := range r.cards {
+				c := &r.cards[i]
+				if c.X <= ts.X && c.Y <= ts.Y && c.X+c.Width >= ts.X && c.Y+c.Height >= ts.Y {
+					if card == nil || card.Z < c.Z {
+						card = c
+					}
+				}
+			}
+			r.dragged = card
+			card.Content.(*StandardDeck).Visible = true
+		} else if ts.Pressed {
+			r.dragged.X = ts.X
+			r.dragged.Y = ts.Y // todo: should adjust for offset
+		} else if r.dragged != nil {
+			// place or return card
+			r.dragged = nil
+		}
 	}
 	return nil
 }
@@ -52,6 +74,7 @@ func shuffle_deck() []Card {
 		for j := range 13 {
 			cards = append(cards, Card{
 				X: 0, Y: 0, Z: 0,
+				Width: 36 * 3, Height: 54 * 3, // todo, fix
 				Content: &StandardDeck{Suit: i, Value: j + 2, Visible: false},
 			})
 		}

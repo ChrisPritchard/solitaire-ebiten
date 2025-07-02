@@ -10,8 +10,9 @@ import (
 )
 
 type Card struct {
-	X, Y, Z int
-	Content CardContent
+	X, Y, Z       int
+	Width, Height int
+	Content       CardContent
 }
 
 type CardContent interface {
