@@ -32,7 +32,7 @@ type SawayamaRules struct {
 	state gamestate
 }
 
-func (r *SawayamaRules) Update() error {
+func (r *SawayamaRules) Update(touchState TouchState) error {
 	switch r.state {
 	case shuffling:
 		r.cards = shuffle_deck()

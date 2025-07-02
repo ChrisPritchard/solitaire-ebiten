@@ -30,3 +30,6 @@ I want to support both mouse and touch inputs, which work differently in ebiten.
 - if just pressed, is there a card that can be moved? if so, memorise it
 - on updates, if the drag position has moved, then move the moving card
 - on release, determine if the card can be placed there, if so place it, else snap back to its original position
+
+suggestion: start with mouse and abstract to just whats needed: position, state (justpressed, dragging, released)
+pass info to game rules, which can manage if something should occur

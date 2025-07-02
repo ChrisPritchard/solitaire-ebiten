@@ -6,6 +6,7 @@ import (
 	"github.com/chrispritchard/solitaire-ebiten/assets"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Card struct {
@@ -17,17 +18,40 @@ type CardContent interface {
 	Image() *ebiten.Image
 }
 
+type TouchState struct {
+	Pressed bool
+	X       int
+	Y       int
+}
+
 type RuleSet interface {
-	Update() error
+	Update(TouchState) error
 	Cards() []Card
 }
 
 type Game struct {
-	rules RuleSet
+	rules   RuleSet
+	pressed bool
+}
+
+func NewGame(rules RuleSet) Game {
+	return Game{
+		rules:   rules,
+		pressed: false,
+	}
 }
 
 func (game *Game) Update() error {
-	return game.rules.Update()
+
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		game.pressed = true
+	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+		game.pressed = false
+	}
+	x, y := ebiten.CursorPosition()
+	touchState := TouchState{game.pressed, x, y}
+
+	return game.rules.Update(touchState)
 }
 
 func (game *Game) Draw(screen *ebiten.Image) {

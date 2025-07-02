@@ -15,7 +15,7 @@ func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Sawayama Solitaire")
 
-	game := Game{rules: &SawayamaRules{}}
+	game := NewGame(&SawayamaRules{})
 
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
