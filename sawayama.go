@@ -50,20 +50,28 @@ func (r *SawayamaRules) Update(ts TouchState) error {
 			var card *Card = nil
 			for i := range r.cards {
 				c := &r.cards[i]
-				if c.X <= ts.X && c.Y <= ts.Y && c.X+c.Width >= ts.X && c.Y+c.Height >= ts.Y {
-					if card == nil || card.Z < c.Z {
-						card = c
-					}
+				if c.X <= ts.X && c.Y <= ts.Y && c.X+c.Width >= ts.X && c.Y+c.Height >= ts.Y && (card == nil || card.Z < c.Z) {
+					card = c
 				}
 			}
-			r.dragState.card = card
-			r.dragState.offsetX = ts.X - card.X
-			r.dragState.offsetY = ts.Y - card.Y
-			card.Content.(*StandardDeck).Visible = true
+			if card != nil {
+				card.Z = 999999
+				r.dragState.card = card
+				r.dragState.offsetX = ts.X - card.X
+				r.dragState.offsetY = ts.Y - card.Y
+				card.Content.(*StandardDeck).Visible = true
+			}
 		} else if ts.Pressed {
 			r.dragState.card.X = ts.X - r.dragState.offsetX
 			r.dragState.card.Y = ts.Y - r.dragState.offsetY
 		} else if r.dragState.card != nil {
+			max := 0
+			for _, c := range r.cards {
+				if c.Z > max {
+					max = c.Z
+				}
+			}
+			r.dragState.card.Z = max + 1
 			// place or return card
 			r.dragState.card = nil
 		}
@@ -100,6 +108,10 @@ func shuffle_deck() []Card {
 		if len(cards) == 0 {
 			break
 		}
+	}
+
+	for i := range shuffled {
+		shuffled[i].Z = i
 	}
 
 	return shuffled
