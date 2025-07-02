@@ -27,10 +27,16 @@ const (
 	dealing
 )
 
+type dragState struct {
+	card    *Card
+	offsetX int
+	offsetY int
+}
+
 type SawayamaRules struct {
-	cards   []Card
-	state   gamestate
-	dragged *Card
+	cards     []Card
+	state     gamestate
+	dragState dragState
 }
 
 func (r *SawayamaRules) Update(ts TouchState) error {
@@ -39,7 +45,7 @@ func (r *SawayamaRules) Update(ts TouchState) error {
 		r.cards = shuffle_deck()
 		r.state = dealing
 	default:
-		if ts.Pressed && r.dragged == nil {
+		if ts.Pressed && r.dragState.card == nil {
 			// detect if card under cursor
 			var card *Card = nil
 			for i := range r.cards {
@@ -50,14 +56,16 @@ func (r *SawayamaRules) Update(ts TouchState) error {
 					}
 				}
 			}
-			r.dragged = card
+			r.dragState.card = card
+			r.dragState.offsetX = ts.X - card.X
+			r.dragState.offsetY = ts.Y - card.Y
 			card.Content.(*StandardDeck).Visible = true
 		} else if ts.Pressed {
-			r.dragged.X = ts.X
-			r.dragged.Y = ts.Y // todo: should adjust for offset
-		} else if r.dragged != nil {
+			r.dragState.card.X = ts.X - r.dragState.offsetX
+			r.dragState.card.Y = ts.Y - r.dragState.offsetY
+		} else if r.dragState.card != nil {
 			// place or return card
-			r.dragged = nil
+			r.dragState.card = nil
 		}
 	}
 	return nil
