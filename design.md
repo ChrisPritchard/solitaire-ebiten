@@ -33,3 +33,12 @@ I want to support both mouse and touch inputs, which work differently in ebiten.
 
 suggestion: start with mouse and abstract to just whats needed: position, state (justpressed, dragging, released)
 pass info to game rules, which can manage if something should occur
+
+## initial setup
+
+- shuffle deck
+- render in position as a stack
+- render spaces for foundation, waste etc
+- deal out piles
+  - move action moving one card at a time...
+  -
