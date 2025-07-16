@@ -72,7 +72,7 @@ func (r *SawayamaRules) Update(ts TouchState) error {
 				}
 			}
 			r.dragState.card.Z = max + 1
-			// place or return card
+			// todo: place or return card
 			r.dragState.card = nil
 		}
 	}
@@ -80,8 +80,7 @@ func (r *SawayamaRules) Update(ts TouchState) error {
 }
 
 func (r *SawayamaRules) Cards() []Card {
-
-	return r.cards
+	return append([]Card{}, r.cards...)
 }
 
 func shuffle_deck() []Card {
