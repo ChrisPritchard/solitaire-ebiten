@@ -5,8 +5,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"sort"
-
 	"github.com/chrispritchard/solitaire-ebiten/assets"
 
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -17,25 +15,8 @@ const (
 	screenHeight = 480
 )
 
-func main() {
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowTitle("Sawayama Solitaire")
-
-	game := NewGame(&SawayamaRules{})
-
-	if err := ebiten.RunGame(&game); err != nil {
-		log.Fatal(err)
-	}
-}
-
-type Card struct {
-	X, Y, Z       int
-	Width, Height int
-	Content       CardContent
-}
-
-type CardContent interface {
-	Image() *ebiten.Image
+type game_loop struct {
+	pressed bool
 }
 
 type TouchState struct {
@@ -44,54 +25,50 @@ type TouchState struct {
 	Y       int
 }
 
-type RuleSet interface {
-	Update(TouchState) error
-	Cards() []Card
-}
+var game SawayamaRules
 
-type Game struct {
-	rules   RuleSet
-	pressed bool
-}
+func main() {
+	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowTitle("Sawayama Solitaire")
 
-func NewGame(rules RuleSet) Game {
-	return Game{
-		rules:   rules,
-		pressed: false,
+	game = SawayamaRules{}
+
+	if err := ebiten.RunGame(&game_loop{}); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func (game *Game) Update() error {
+func (gl *game_loop) Update() error {
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		game.pressed = true
+		gl.pressed = true
 	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-		game.pressed = false
+		gl.pressed = false
 	}
 	x, y := ebiten.CursorPosition()
-	touchState := TouchState{game.pressed, x, y}
+	touchState := TouchState{gl.pressed, x, y}
 
-	return game.rules.Update(touchState)
+	return game.Update(touchState)
 }
 
-func (game *Game) Draw(screen *ebiten.Image) {
+func (_ *game_loop) Draw(screen *ebiten.Image) {
 	screen.DrawImage(assets.Background, nil)
 
-	cards := game.rules.Cards()
-	sort.Slice(cards, func(i, j int) bool {
-		return cards[i].Z < cards[j].Z
-	})
+	images, err := Transform(game)
+	if err != nil {
+		log.Fatalf("error on transform: {}", err)
+	}
 
-	for _, card := range cards {
+	for _, image_data := range images {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(3, 3)
-		op.GeoM.Translate(float64(card.X), float64(card.Y))
+		op.GeoM.Translate(float64(image_data.X), float64(image_data.Y))
 
-		img := card.Content.Image()
+		img := image_data.Image
 		screen.DrawImage(img, op)
 	}
 }
 
-func (game *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (_ *game_loop) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }

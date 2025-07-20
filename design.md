@@ -72,3 +72,18 @@ the idea is that a card tracks its board 'position', defined in card units. this
 dragging becomes a little complex - while the game stores the drag state, and this could be modified to not use pixel coordinates on the card, how would that be surfaced to the renderer? presently cards are provided as a slice, so it would need to be (in the current structure) part of the card slice elements.
 
 couple of options here; actually they're sort of the same option: use a different model for the presentation to the renderer. this would just be pixel positions and image asset - almost like a view model. this does take asset and size conversion out of the renderer and puts them in this view model transform, wherever that is, but that could be fine - it further simplifies the core game loop object.
+
+## MVVM in go
+
+how would this look?
+
+we have the game mechanics, in one file
+we have a view transform, that could just be a function
+we have the renderer interfaces with ebitengine, including picking up the touch state on update
+
+maybe keep Main, holding a GameLoop (instead of just Game, making somewhat clear it isnt the whole thing)
+on update, the GameLoop would call a Transform function, passing in the Sawayama model object. This would no longer be a 'RuleSet' interface, maybe, but just a model or struct.
+
+> in this way, the transform function doesnt get silly with its signature. it can be defined directly on sawayama. the close coupling might suggest they could be one object, but this distinctness allows for sawayama to be taken out and converted into another engine like the original concept.
+
+the transform returns images, and maybe sounds? which the gameloop then draws.
