@@ -42,3 +42,33 @@ pass info to game rules, which can manage if something should occur
 - deal out piles
   - move action moving one card at a time...
   -
+
+## coordinate system
+
+cards can only be in certain positions, when placed. they can be anyway while being dragged, but the placement positions on the board are fixed:
+
+```
+[]  []
+[]  [] [] []
+[]     [] []
+[]        []
+```
+
+etc.
+
+establishing this 'grid' would likely be a help
+
+the grid is basically defined in card 'units', with whole units for things like the foundations, and partial units for the piles which overlay their contents
+
+rather than using pixel coordinates, then, it might be advisable to store card positions in terms of units. however, how does this apply to dragging?
+
+> is the separation between 'game' and the 'rules' getting in the way? or does it help keep things unique. i think i should drop it, for now, while still being mindful of separation. the main difference would be removing 'card content' from cards, and just embedding that data straight. also not relying entirely on a separate rules object for where things are placed. that being said, i like the moving of pure game stuff, like reading ebitengine's touch state, into its own thing. perhaps those could be removed into a helper class instead?
+> there is also the separation of game objects from their image assets, which allows the 'game' to be more portable (if i do what i originally intended to do, and also build this in godot)
+> and the fact that certain rendering considerations, like resolution, don't need to be a factor in the game. as a counter though, pixel positions are a mix, and sounds will also be a mix (though that might be solved with some sort of mvu eventing system)
+
+a few modifications both to help with these grid mechanics, and dragging.
+
+the idea is that a card tracks its board 'position', defined in card units. this could be, in the y direction, four units per card while in the x direction just two. the renderer part of things would handle converting this to pixel units
+dragging becomes a little complex - while the game stores the drag state, and this could be modified to not use pixel coordinates on the card, how would that be surfaced to the renderer? presently cards are provided as a slice, so it would need to be (in the current structure) part of the card slice elements.
+
+couple of options here; actually they're sort of the same option: use a different model for the presentation to the renderer. this would just be pixel positions and image asset - almost like a view model. this does take asset and size conversion out of the renderer and puts them in this view model transform, wherever that is, but that could be fine - it further simplifies the core game loop object.
