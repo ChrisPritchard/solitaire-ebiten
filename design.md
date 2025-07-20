@@ -87,3 +87,7 @@ on update, the GameLoop would call a Transform function, passing in the Sawayama
 > in this way, the transform function doesnt get silly with its signature. it can be defined directly on sawayama. the close coupling might suggest they could be one object, but this distinctness allows for sawayama to be taken out and converted into another engine like the original concept.
 
 the transform returns images, and maybe sounds? which the gameloop then draws.
+
+dragging is interesting. the problem is the game returns pixel coordinates for the mouse, and whether or not the user is mouse clicking or touching. in the current model, the game uses those coords and its knowledge of both card size and positions to find an appropriate card to start dragging, at which point it tracks offsets etc. but if the new model doesnt contain most of this info in the rules, then how might this work?
+
+- the viewmodel could hold code to transform cursor positions into possible cards. this might involve the game understanding scaling
