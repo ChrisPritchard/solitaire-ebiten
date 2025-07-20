@@ -21,7 +21,7 @@ func Transform(game SawayamaRules) ([]ImageData, error) {
 
 	for _, c := range game.Cards {
 		x := float64(c.CUX) * card_width / 2
-		y := float64(c.CUY) * card_height / 4 // todo: needs to be even?
+		y := float64(c.CUY) * card_height / 4
 		var image *ebiten.Image
 		if !c.Visible {
 			image = assets.CardBack

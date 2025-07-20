@@ -51,24 +51,24 @@ func (gl *game_loop) Update() error {
 	return game.Update(touchState)
 }
 
-func (_ *game_loop) Draw(screen *ebiten.Image) {
+func (*game_loop) Draw(screen *ebiten.Image) {
 	screen.DrawImage(assets.Background, nil)
 
 	images, err := Transform(game)
 	if err != nil {
-		log.Fatalf("error on transform: {}", err)
+		log.Fatalf("error on transform: %v", err)
 	}
 
 	for _, image_data := range images {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(3, 3)
-		op.GeoM.Translate(float64(image_data.X), float64(image_data.Y))
+		op.GeoM.Translate(image_data.X, image_data.Y)
 
 		img := image_data.Image
 		screen.DrawImage(img, op)
 	}
 }
 
-func (_ *game_loop) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (*game_loop) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
