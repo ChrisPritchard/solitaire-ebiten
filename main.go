@@ -13,6 +13,9 @@ import (
 const (
 	screenWidth  = 640
 	screenHeight = 480
+	cardScaling  = 3
+	card_width   = 36. * cardScaling
+	card_height  = 54. * cardScaling
 )
 
 type game_loop struct {
@@ -26,12 +29,14 @@ type TouchState struct {
 }
 
 var game SawayamaRules
+var view_model ViewModel
 
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Sawayama Solitaire")
 
 	game = SawayamaRules{}
+	view_model = ViewModel{CardWidth: card_width, CardHeight: card_height}
 
 	if err := ebiten.RunGame(&game_loop{}); err != nil {
 		log.Fatal(err)
@@ -48,20 +53,20 @@ func (gl *game_loop) Update() error {
 	x, y := ebiten.CursorPosition()
 	touchState := TouchState{gl.pressed, x, y}
 
-	return game.Update(touchState)
+	return view_model.Update(touchState, game)
 }
 
 func (*game_loop) Draw(screen *ebiten.Image) {
 	screen.DrawImage(assets.Background, nil)
 
-	images, err := Transform(game)
+	images, err := view_model.Transform(game)
 	if err != nil {
 		log.Fatalf("error on transform: %v", err)
 	}
 
 	for _, image_data := range images {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(3, 3)
+		op.GeoM.Scale(cardScaling, cardScaling)
 		op.GeoM.Translate(image_data.X, image_data.Y)
 
 		img := image_data.Image

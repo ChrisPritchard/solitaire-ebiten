@@ -13,16 +13,9 @@ const (
 	dealing
 )
 
-type dragState struct {
-	card    *Card
-	offsetX int
-	offsetY int
-}
-
 type SawayamaRules struct {
-	Cards     []Card
-	state     gamestate
-	dragState dragState
+	Cards []Card
+	state gamestate
 }
 
 func (r *SawayamaRules) Update(ts TouchState) error {
