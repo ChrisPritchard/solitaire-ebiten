@@ -24,8 +24,8 @@ type game_loop struct {
 
 type TouchState struct {
 	Pressed bool
-	X       int
-	Y       int
+	X       float64
+	Y       float64
 }
 
 var game SawayamaRules
@@ -51,9 +51,9 @@ func (gl *game_loop) Update() error {
 		gl.pressed = false
 	}
 	x, y := ebiten.CursorPosition()
-	touchState := TouchState{gl.pressed, x, y}
+	touchState := TouchState{gl.pressed, float64(x), float64(y)}
 
-	return view_model.Update(touchState, game)
+	return view_model.Update(touchState, &game)
 }
 
 func (*game_loop) Draw(screen *ebiten.Image) {

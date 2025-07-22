@@ -1,10 +1,17 @@
 package main
 
+import "slices"
+
 type Card struct {
 	CUX, CUY    int
 	Suit, Value int
 	Visible     bool
 }
+
+const (
+	CUX_per_card = 2
+	CUY_per_card = 4
+)
 
 type gamestate int
 
@@ -18,7 +25,7 @@ type SawayamaRules struct {
 	state gamestate
 }
 
-func (r *SawayamaRules) Update(ts TouchState) error {
+func (r *SawayamaRules) Update() error {
 	switch r.state {
 	case shuffling:
 		r.Cards = shuffle_deck()
@@ -87,4 +94,20 @@ func shuffle_deck() []Card {
 	// return shuffled
 
 	return cards
+}
+
+func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
+	res := []*Card{}
+
+	for _, c := range slices.Backward(r.Cards) {
+		if cux >= c.CUX && c.CUX <= cux+CUX_per_card {
+			if cuy >= c.CUY && c.CUY <= cuy+CUY_per_card {
+				res = append(res, &c)
+				// TODO: find stack
+				break
+			}
+		}
+	}
+
+	return res
 }
