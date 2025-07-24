@@ -99,11 +99,12 @@ func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
 		return nil // unlikely to ever happen
 	}
 
-	for i, c := range slices.Backward(r.Cards) {
+	for i := len(r.Cards) - 1; i >= 0; i-- {
+		c := &r.Cards[i]
 		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
 			if cuy >= c.CUY && cuy <= c.CUY+CUY_per_card {
-				possible := []*Card{&c}
-				next := &c
+				possible := []*Card{c}
+				next := c
 				for _, d := range r.Cards[i:] {
 					if d.CUX == c.CUX && d.CUY == next.CUY+1 {
 						if d.Value == next.Value-1 && d.Suit%2 != next.Suit%2 {
@@ -120,4 +121,22 @@ func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
 	}
 
 	return nil
+}
+
+func (r *SawayamaRules) DroppableAt(cux, cuy int, suit, value int) (bool, int, int) {
+	for i, c := range slices.Backward(r.Cards) {
+		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
+			if cuy >= c.CUY && cuy <= c.CUY+CUY_per_card {
+				for _, d := range r.Cards[i:] {
+					if d.CUX == c.CUX && d.CUY == c.CUY+1 {
+						return false, 0, 0 // not the top card, so can't drop here
+						// todo, account for foundations and free spaces
+					}
+				}
+				return c.Suit%2 != suit%2 && c.Value == value+1, c.CUX, c.CUY
+			}
+		}
+	}
+
+	return false, 0, 0
 }

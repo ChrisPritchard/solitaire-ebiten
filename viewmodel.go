@@ -52,7 +52,15 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 			})
 		}
 	} else if !ts.Pressed && vm.dragged_cards != nil {
-		// TODO: test if card can be dropped
+		cux, cuy := vm.pixels_to_card_units(ts.X, ts.Y)
+		head_card := vm.dragged_cards[0]
+		can_be_dropped, cux, cuy := game.DroppableAt(cux, cuy, head_card.card.Suit, head_card.card.Value)
+		if can_be_dropped {
+			for i, d := range vm.dragged_cards {
+				(*d.card).CUX = cux
+				(*d.card).CUY = cuy + i + 1
+			}
+		}
 		vm.dragged_cards = nil
 	}
 
