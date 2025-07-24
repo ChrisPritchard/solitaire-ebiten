@@ -58,13 +58,7 @@ func (gl *game_loop) Update() error {
 
 func (*game_loop) Draw(screen *ebiten.Image) {
 	screen.DrawImage(assets.Background, nil)
-
-	images, err := view_model.Transform(game)
-	if err != nil {
-		log.Fatalf("error on transform: %v", err)
-	}
-
-	for _, image_data := range images {
+	for _, image_data := range view_model.Transform(game) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(cardScaling, cardScaling)
 		op.GeoM.Translate(image_data.X, image_data.Y)

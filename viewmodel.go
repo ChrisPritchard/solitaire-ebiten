@@ -59,17 +59,20 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 	return nil
 }
 
-func (vm *ViewModel) Transform(game SawayamaRules) ([]ImageData, error) {
+func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 
 	res := []ImageData{}
+	dragged := []ImageData{}
 
 	for _, c := range game.Cards {
 		x, y := vm.card_units_to_pixels(c.CUX, c.CUY)
+		is_dragged := false
 
 		for _, d := range vm.dragged_cards {
 			if *d.card == c {
 				x += float64(vm.cursor_x - d.offset_x)
 				y += float64(vm.cursor_y - d.offset_y)
+				is_dragged = true
 				break
 			}
 		}
@@ -81,12 +84,21 @@ func (vm *ViewModel) Transform(game SawayamaRules) ([]ImageData, error) {
 			image = assets.Cards[c.Suit][c.Value]
 		}
 
-		res = append(res, ImageData{
-			X:     x,
-			Y:     y,
-			Image: image,
-		})
+		if is_dragged {
+			dragged = append(dragged, ImageData{
+				X:     x,
+				Y:     y,
+				Image: image,
+			})
+		} else {
+			res = append(res, ImageData{
+				X:     x,
+				Y:     y,
+				Image: image,
+			})
+		}
 	}
 
-	return res, nil
+	res = append(res, dragged...) // ensuring they're on top
+	return res
 }
