@@ -13,7 +13,7 @@ import (
 const (
 	screenWidth  = 640
 	screenHeight = 480
-	cardScaling  = 3
+	cardScaling  = 2
 	card_width   = 36. * cardScaling
 	card_height  = 54. * cardScaling
 )

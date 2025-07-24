@@ -96,3 +96,7 @@ the viewmodel could hold code to transform cursor positions into possible cards.
 - the game really only needs to know whether a card has been selected or not, whether its being dragged. its position on the screen is irrelevant to the rules, until it is released at which point it needs to calculate if it can be placed in the position it is over
 - the gameloop however, needs to render that image in a specific position. the viewmodel at present is what takes game rule cards and turns them into pixel coordinates
 - the viewmodel is presently a function. could it be stateful? could it track the movement of a card? in a sense, as described above, the moving of cards around the screen is not a rule concern until they are released...
+
+other considerations:
+
+what about the deck? its a bunch of non-visible cards layered on top of each other. ideally this should look like a stack, and not just the last card's back. might require some smarts in the view model. could also just ignore this problem for now.

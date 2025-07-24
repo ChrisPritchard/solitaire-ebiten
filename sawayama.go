@@ -1,6 +1,9 @@
 package main
 
-import "slices"
+import (
+	"math/rand"
+	"slices"
+)
 
 type Card struct {
 	CUX, CUY    int
@@ -9,7 +12,7 @@ type Card struct {
 }
 
 const (
-	CUX_per_card = 2
+	CUX_per_card = 4
 	CUY_per_card = 4
 )
 
@@ -18,6 +21,7 @@ type gamestate int
 const (
 	shuffling gamestate = iota
 	dealing
+	ready
 )
 
 type SawayamaRules struct {
@@ -30,37 +34,11 @@ func (r *SawayamaRules) Update() error {
 	case shuffling:
 		r.Cards = shuffle_deck()
 		r.state = dealing
+	case dealing:
+		r.Cards = initial_deal(r.Cards)
+		r.state = ready
 	default:
-		// if ts.Pressed && r.dragState.card == nil {
-		// 	// detect if card under cursor
-		// 	var card *Card = nil
-		// 	for i := range r.cards {
-		// 		c := &r.cards[i]
-		// 		if c.X <= ts.X && c.Y <= ts.Y && c.X+c.Width >= ts.X && c.Y+c.Height >= ts.Y && (card == nil || card.Z < c.Z) {
-		// 			card = c
-		// 		}
-		// 	}
-		// 	if card != nil {
-		// 		card.Z = 999999
-		// 		r.dragState.card = card
-		// 		r.dragState.offsetX = ts.X - card.X
-		// 		r.dragState.offsetY = ts.Y - card.Y
-		// 		card.Content.(*StandardDeck).Visible = true
-		// 	}
-		// } else if ts.Pressed {
-		// 	r.dragState.card.X = ts.X - r.dragState.offsetX
-		// 	r.dragState.card.Y = ts.Y - r.dragState.offsetY
-		// } else if r.dragState.card != nil {
-		// 	max := 0
-		// 	for _, c := range r.cards {
-		// 		if c.Z > max {
-		// 			max = c.Z
-		// 		}
-		// 	}
-		// 	r.dragState.card.Z = max + 1
-		// 	// todo: place or return card
-		// 	r.dragState.card = nil
-		// }
+
 	}
 	return nil
 }
@@ -70,30 +48,51 @@ func shuffle_deck() []Card {
 	for i := range 4 {
 		for j := range 13 {
 			cards = append(cards, Card{
-				CUX: i * 3, CUY: j,
+				CUX: 1, CUY: 1, // top-left deck position
 				Suit: i, Value: j + 2,
-				Visible: true,
+				Visible: false,
 			})
 		}
 	}
 
-	// shuffled := make([]Card, 0)
-	// for {
-	// 	next := rand.Intn(len(cards))
-	// 	shuffled = append(shuffled, cards[next])
-	// 	if next == 0 {
-	// 		cards = cards[1:]
-	// 	} else {
-	// 		cards = append(cards[:next-1], cards[next+1:]...)
-	// 	}
-	// 	if len(cards) == 0 {
-	// 		break
-	// 	}
-	// }
+	shuffled := make([]Card, 0)
+	for {
+		next := rand.Intn(len(cards))
+		shuffled = append(shuffled, cards[next])
+		if next == 0 {
+			cards = cards[1:]
+		} else {
+			cards = append(cards[:next], cards[next+1:]...)
+		}
+		if len(cards) == 0 {
+			break
+		}
+	}
 
-	// return shuffled
+	return shuffled
+}
 
-	return cards
+func initial_deal(deck []Card) []Card {
+
+	c := len(deck) - 1
+	res := []Card{}
+
+	pile_y := 2 + CUY_per_card
+	for i := range 7 {
+		pile_x := 1 + i*CUX_per_card + i
+		for j := range i + 1 {
+			next := deck[c]
+			next.CUX = pile_x
+			next.CUY = pile_y + j
+			next.Visible = true
+			res = append(res, next)
+			c--
+		}
+	}
+
+	res = append(res, deck[:c]...)
+
+	return res
 }
 
 func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
