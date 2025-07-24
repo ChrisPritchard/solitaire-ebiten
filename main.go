@@ -35,7 +35,7 @@ func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Sawayama Solitaire")
 
-	game = SawayamaRules{}
+	game = Setup()
 	view_model = ViewModel{CardWidth: card_width, CardHeight: card_height}
 
 	if err := ebiten.RunGame(&game_loop{}); err != nil {

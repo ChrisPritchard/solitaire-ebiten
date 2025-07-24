@@ -35,7 +35,7 @@ func (vm *ViewModel) card_units_to_pixels(cux, cuy int) (float64, float64) {
 }
 
 func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
-	game.Update()
+
 	vm.cursor_x = ts.X
 	vm.cursor_y = ts.Y
 

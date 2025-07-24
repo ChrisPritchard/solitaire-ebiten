@@ -100,3 +100,13 @@ the viewmodel could hold code to transform cursor positions into possible cards.
 other considerations:
 
 what about the deck? its a bunch of non-visible cards layered on top of each other. ideally this should look like a stack, and not just the last card's back. might require some smarts in the view model. could also just ignore this problem for now.
+
+## remaining tasks for workable core rules
+
+- click on deck to draw three to the side
+- drag from waste
+- drag onto foundations
+
+the game rules themselves *could* split the cards into piles, foundations etc to have a little less iteration. but would that add much? I *do* need to understand if they have clicked on the deck, they're working off something in the waste (and therefore can only have the top card) or the foundation (and therefore can't drag from, but can drop to with the new cu coords being the same)
+
+as a side note, right now touch integration is not passed to the game, only touch is detected. i guess there coulod be a 'is deck' event, or the viewmodel could understand where the deck is and click it.

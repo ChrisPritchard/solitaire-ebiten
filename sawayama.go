@@ -16,31 +16,15 @@ const (
 	CUY_per_card = 4
 )
 
-type gamestate int
-
-const (
-	shuffling gamestate = iota
-	dealing
-	ready
-)
-
 type SawayamaRules struct {
 	Cards []Card
-	state gamestate
 }
 
-func (r *SawayamaRules) Update() error {
-	switch r.state {
-	case shuffling:
-		r.Cards = shuffle_deck()
-		r.state = dealing
-	case dealing:
-		r.Cards = initial_deal(r.Cards)
-		r.state = ready
-	default:
-
-	}
-	return nil
+func Setup() SawayamaRules {
+	shuffled := shuffle_deck()
+	r := SawayamaRules{}
+	r.Cards = initial_deal(shuffled)
+	return r
 }
 
 func shuffle_deck() []Card {
@@ -72,15 +56,15 @@ func shuffle_deck() []Card {
 	return shuffled
 }
 
-func initial_deal(deck []Card) []Card {
-	c := len(deck) - 1
+func initial_deal(shuffled []Card) []Card {
+	c := len(shuffled) - 1
 	res := []Card{}
 
 	pile_y := 2 + CUY_per_card
 	for i := range 7 {
 		pile_x := 1 + i*CUX_per_card + i
 		for j := range i + 1 {
-			next := deck[c]
+			next := shuffled[c]
 			next.CUX = pile_x
 			next.CUY = pile_y + j
 			next.Visible = true
@@ -89,16 +73,12 @@ func initial_deal(deck []Card) []Card {
 		}
 	}
 
-	res = append(res, deck[:c]...)
+	res = append(res, shuffled[:c]...)
 
 	return res
 }
 
 func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
-	if r.state != ready {
-		return nil // unlikely to ever happen
-	}
-
 	for i := len(r.Cards) - 1; i >= 0; i-- {
 		c := &r.Cards[i]
 		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
@@ -139,4 +119,8 @@ func (r *SawayamaRules) DroppableAt(cux, cuy int, suit, value int) (bool, int, i
 	}
 
 	return false, 0, 0
+}
+
+func (r *SawayamaRules) DrawFromDeck() bool {
+	return false
 }
