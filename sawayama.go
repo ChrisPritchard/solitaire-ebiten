@@ -99,8 +99,8 @@ func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
 	res := []*Card{}
 
 	for _, c := range slices.Backward(r.Cards) {
-		if cux >= c.CUX && c.CUX <= cux+CUX_per_card {
-			if cuy >= c.CUY && c.CUY <= cuy+CUY_per_card {
+		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
+			if cuy >= c.CUY && cuy <= c.CUY+CUY_per_card {
 				res = append(res, &c)
 				// TODO: find stack
 				break
