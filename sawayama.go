@@ -73,7 +73,6 @@ func shuffle_deck() []Card {
 }
 
 func initial_deal(deck []Card) []Card {
-
 	c := len(deck) - 1
 	res := []Card{}
 
@@ -96,17 +95,29 @@ func initial_deal(deck []Card) []Card {
 }
 
 func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
-	res := []*Card{}
+	if r.state != ready {
+		return nil // unlikely to ever happen
+	}
 
-	for _, c := range slices.Backward(r.Cards) {
+	for i, c := range slices.Backward(r.Cards) {
 		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
 			if cuy >= c.CUY && cuy <= c.CUY+CUY_per_card {
-				res = append(res, &c)
-				// TODO: find stack
-				break
+				possible := []*Card{&c}
+				next := &c
+				for _, d := range r.Cards[i:] {
+					if d.CUX == c.CUX && d.CUY == next.CUY+1 {
+						if d.Value == next.Value-1 && d.Suit%2 != next.Suit%2 {
+							possible = append(possible, &d)
+							next = &d
+						} else {
+							return nil
+						}
+					}
+				}
+				return possible
 			}
 		}
 	}
 
-	return res
+	return nil
 }
