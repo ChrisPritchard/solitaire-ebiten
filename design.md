@@ -110,3 +110,15 @@ what about the deck? its a bunch of non-visible cards layered on top of each oth
 the game rules themselves *could* split the cards into piles, foundations etc to have a little less iteration. but would that add much? I *do* need to understand if they have clicked on the deck, they're working off something in the waste (and therefore can only have the top card) or the foundation (and therefore can't drag from, but can drop to with the new cu coords being the same)
 
 as a side note, right now touch integration is not passed to the game, only touch is detected. i guess there coulod be a 'is deck' event, or the viewmodel could understand where the deck is and click it.
+
+sorting issues:
+
+right now cards are rendered in the order they have within the deck. when cards are moved from a left pile to a right pile, their cu coords are updated but not their position in the deck, meaning that they get overdrawn by higher cards in the same pile
+
+the solution could be:
+
+- when moving, remove and insert into the card slice rather than (or in addition to) just updating cu
+- have the deck resorted before rendering, or post stack move
+- have the renderer (or the view model) follow rules to draw based on cux/cuy
+
+none of these are super clean; the last one because it will require a sorting operation on every draw. or we could follow a 'dirty flag' model and do so only when the deck is changed. if the sorting is done via the viewmodel, it might be able to track this.

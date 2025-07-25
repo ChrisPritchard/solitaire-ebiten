@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"slices"
+	"sort"
 )
 
 type Card struct {
@@ -78,6 +79,16 @@ func initial_deal(shuffled []Card) []Card {
 	return res
 }
 
+func (r *SawayamaRules) Sort() {
+	sort.Slice(r.Cards, func(i, j int) bool {
+		if r.Cards[i].CUX == r.Cards[j].CUX {
+			return r.Cards[i].CUY < r.Cards[j].CUY
+		} else {
+			return r.Cards[i].CUX < r.Cards[j].CUX
+		}
+	})
+}
+
 func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
 	for i := len(r.Cards) - 1; i >= 0; i-- {
 		c := &r.Cards[i]
@@ -113,7 +124,7 @@ func (r *SawayamaRules) DroppableAt(cux, cuy int, suit, value int) (bool, int, i
 						// todo, account for foundations and free spaces
 					}
 				}
-				return c.Suit%2 != suit%2 && c.Value == value+1, c.CUX, c.CUY
+				return c.Suit%2 != suit%2 && c.Value == value+1, c.CUX, c.CUY + 1 // for piles
 			}
 		}
 	}

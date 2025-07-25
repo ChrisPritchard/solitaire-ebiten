@@ -58,8 +58,9 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 		if can_be_dropped {
 			for i, d := range vm.dragged_cards {
 				(*d.card).CUX = cux
-				(*d.card).CUY = cuy + i + 1
+				(*d.card).CUY = cuy + i
 			}
+			game.Sort()
 		}
 		vm.dragged_cards = nil
 	}
