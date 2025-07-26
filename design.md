@@ -111,7 +111,7 @@ the game rules themselves *could* split the cards into piles, foundations etc to
 
 as a side note, right now touch integration is not passed to the game, only touch is detected. i guess there coulod be a 'is deck' event, or the viewmodel could understand where the deck is and click it.
 
-sorting issues:
+## sorting issues
 
 right now cards are rendered in the order they have within the deck. when cards are moved from a left pile to a right pile, their cu coords are updated but not their position in the deck, meaning that they get overdrawn by higher cards in the same pile
 
@@ -122,3 +122,9 @@ the solution could be:
 - have the renderer (or the view model) follow rules to draw based on cux/cuy
 
 none of these are super clean; the last one because it will require a sorting operation on every draw. or we could follow a 'dirty flag' model and do so only when the deck is changed. if the sorting is done via the viewmodel, it might be able to track this.
+
+## empty spaces
+
+when a pile is cleared, there is an empty space. also, when the deck is emptied. the draggable code needs to account for these somehow
+
+i think the deck should be its own thing, too. perhaps revisit splitting cards into their positions?

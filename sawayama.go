@@ -109,7 +109,7 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) []*Card {
 	return nil
 }
 
-func (r *SawayamaRules) DroppableAt(point Vec2[int], suit, value int) (bool, Vec2[int]) {
+func (r *SawayamaRules) DroppableAt(point Vec2[int], suit, value int, is_stack bool) (bool, Vec2[int]) {
 	for i, c := range slices.Backward(r.Cards) {
 		if c.Pos.Contains(point, CU_per_card) {
 			for _, d := range r.Cards[i:] {
