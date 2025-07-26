@@ -109,20 +109,23 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) []*Card {
 	return nil
 }
 
-func (r *SawayamaRules) DroppableAt(point Vec2[int], suit, value int, is_stack bool) (bool, Vec2[int]) {
+func (r *SawayamaRules) DropAt(point Vec2[int], cards []*Card) {
 	for i, c := range slices.Backward(r.Cards) {
 		if c.Pos.Contains(point, CU_per_card) {
 			for _, d := range r.Cards[i:] {
 				if d.Pos.Equal(c.Pos.Add(0, 1)) {
-					return false, Vec2[int]{} // not the top card, so can't drop here
+					return // not the top card, so can't drop here
 					// todo, account for foundations and free spaces
 				}
 			}
-			return c.Suit%2 != suit%2 && c.Value == value+1, c.Pos.Add(0, 1) // for piles
+			if c.Suit%2 != cards[0].Suit%2 && c.Value == cards[0].Value+1 {
+				for i, d := range cards {
+					d.Pos = c.Pos.Add(0, i+1)
+				}
+			}
+			return
 		}
 	}
-
-	return false, Vec2[int]{}
 }
 
 func (r *SawayamaRules) DrawFromDeck() bool {

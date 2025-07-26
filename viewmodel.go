@@ -49,14 +49,11 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 		}
 	} else if !ts.Pressed && vm.dragged_cards != nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
-		head_card := vm.dragged_cards[0]
-		can_be_dropped, cu := game.DroppableAt(cu, head_card.card.Suit, head_card.card.Value, len(vm.dragged_cards) > 1)
-		if can_be_dropped {
-			for i, d := range vm.dragged_cards {
-				(*d.card).Pos = cu.Add(0, i)
-			}
-			game.Sort()
+		cards := []*Card{}
+		for _, c := range vm.dragged_cards {
+			cards = append(cards, c.card)
 		}
+		game.DropAt(cu, cards)
 		vm.dragged_cards = nil
 	}
 

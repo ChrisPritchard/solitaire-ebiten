@@ -127,4 +127,6 @@ none of these are super clean; the last one because it will require a sorting op
 
 when a pile is cleared, there is an empty space. also, when the deck is emptied. the draggable code needs to account for these somehow
 
-i think the deck should be its own thing, too. perhaps revisit splitting cards into their positions?
+i think the deck should be its own thing, too. perhaps revisit splitting cards into their positions? the difficulty is how we shift cards between piles, or other sets like foundations. the view model directly manipulating it seems unwise.
+
+could change the dragging interaction, so instead of calling Droppable to see if cards can be dropped, just pass them to the game at the drop point and the game can handle updating them and such
