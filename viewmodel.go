@@ -33,7 +33,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 
 	vm.cursor = ts.Pos
 
-	if ts.Pressed && vm.dragged_cards == nil {
+	if ts.Pressed && ts.JustChanged && vm.dragged_cards == nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
 		cards := game.DraggableAt(cu)

@@ -83,6 +83,10 @@ func (r *SawayamaRules) Sort() {
 }
 
 func (r *SawayamaRules) DraggableAt(point Vec2[int]) []*Card {
+	if Deck_CU.Contains(point, CU_per_card) {
+		return nil
+	}
+
 	for i := len(r.Cards) - 1; i >= 0; i-- {
 		c := &r.Cards[i]
 		if c.Pos.Contains(point, CU_per_card) {

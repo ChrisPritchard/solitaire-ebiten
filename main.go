@@ -23,12 +23,15 @@ type game_loop struct {
 }
 
 type TouchState struct {
-	Pressed bool
-	Pos     Vec2[float64]
+	Pressed     bool
+	JustChanged bool
+	Pos         Vec2[float64]
 }
 
 var game SawayamaRules
 var view_model ViewModel
+
+var last_pressed = false
 
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
@@ -50,7 +53,8 @@ func (gl *game_loop) Update() error {
 		gl.pressed = false
 	}
 	x, y := ebiten.CursorPosition()
-	touchState := TouchState{gl.pressed, Vec2[int]{x, y}.ToFloat()}
+	touchState := TouchState{gl.pressed, gl.pressed != last_pressed, Vec2[int]{x, y}.ToFloat()}
+	last_pressed = gl.pressed
 
 	return view_model.Update(touchState, &game)
 }
