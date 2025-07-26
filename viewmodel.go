@@ -65,17 +65,17 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 	res := []ImageData{}
 	dragged := []ImageData{}
 
-	for _, c := range game.Cards {
+	for _, c := range game.Cards() {
 		p := vm.card_units_to_pixels(c.Pos)
 		is_dragged := false
 
-		for _, d := range vm.dragged_cards {
-			if *d.card == c {
-				p = p.Add2(vm.cursor.Subtract2(d.offset))
-				is_dragged = true
-				break
-			}
-		}
+		// for _, d := range vm.dragged_cards {
+		// 	if *d.card == c {
+		// 		p = p.Add2(vm.cursor.Subtract2(d.offset))
+		// 		is_dragged = true
+		// 		break
+		// 	}
+		// }
 
 		var image *ebiten.Image
 		if !c.Visible {
