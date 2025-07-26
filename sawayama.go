@@ -20,14 +20,15 @@ type CardInfo struct {
 
 var CU_per_card = Vec2[int]{4, 4}
 var Deck_CU = Vec2[int]{1, 1}
+var Waste_CU = Deck_CU.Add(CU_per_card.X+1, 0)
 var Pile_CUs = []Vec2[int]{
-	Vec2[int]{1, 2 + CU_per_card.Y},
-	Vec2[int]{2 + CU_per_card.X, 2 + CU_per_card.Y},
-	Vec2[int]{3 + 2*CU_per_card.X, 2 + CU_per_card.Y},
-	Vec2[int]{4 + 3*CU_per_card.X, 2 + CU_per_card.Y},
-	Vec2[int]{5 + 4*CU_per_card.X, 2 + CU_per_card.Y},
-	Vec2[int]{6 + 5*CU_per_card.X, 2 + CU_per_card.Y},
-	Vec2[int]{7 + 6*CU_per_card.X, 2 + CU_per_card.Y},
+	{1, 2 + CU_per_card.Y},
+	{2 + CU_per_card.X, 2 + CU_per_card.Y},
+	{3 + 2*CU_per_card.X, 2 + CU_per_card.Y},
+	{4 + 3*CU_per_card.X, 2 + CU_per_card.Y},
+	{5 + 4*CU_per_card.X, 2 + CU_per_card.Y},
+	{6 + 5*CU_per_card.X, 2 + CU_per_card.Y},
+	{7 + 6*CU_per_card.X, 2 + CU_per_card.Y},
 }
 
 type SawayamaRules struct {
@@ -108,8 +109,13 @@ func (r *SawayamaRules) Cards() []CardInfo {
 }
 
 func (r *SawayamaRules) DraggableAt(point Vec2[int]) []Card {
-	if Deck_CU.Contains(point, CU_per_card) {
-		return nil
+
+	if len(r.deck) == 0 && r.deck_space != nil && Deck_CU.Contains(point, CU_per_card) {
+		return []Card{*r.deck_space}
+	}
+
+	if len(r.waste) > 0 && Waste_CU.Add(len(r.waste)-1, 0).Contains(point, CU_per_card) {
+		return []Card{r.waste[len(r.waste)-1]}
 	}
 
 	for i, pile := range r.piles {
@@ -118,32 +124,16 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) []Card {
 		}
 		if Pile_CUs[i].X <= point.X && Pile_CUs[i].X+CU_per_card.X >= point.X {
 			for j := len(pile) - 1; j >= 0; j-- {
+				if j != len(pile)-1 && (pile[j].Value != pile[j+1].Value+1 || pile[j].Suit%2 == pile[j+1].Suit%2) {
+					return nil // stack isn't valid
+				}
 				cu := Pile_CUs[i].Add(0, j)
 				if cu.Contains(point, CU_per_card) {
-					return []Card{pile[j]}
+					return pile[j:]
 				}
 			}
 		}
 	}
-
-	// for i := len(r.Cards) - 1; i >= 0; i-- {
-	// 	c := &r.Cards[i]
-	// 	if c.Pos.Contains(point, CU_per_card) {
-	// 		possible := []*Card{c}
-	// 		next := c
-	// 		for _, d := range r.Cards[i:] {
-	// 			if d.Pos.Equal(next.Pos.Add(0, 1)) {
-	// 				if d.Value == next.Value-1 && d.Suit%2 != next.Suit%2 {
-	// 					possible = append(possible, &d)
-	// 					next = &d
-	// 				} else {
-	// 					return nil
-	// 				}
-	// 			}
-	// 		}
-	// 		return possible
-	// 	}
-	// }
 
 	return nil
 }
