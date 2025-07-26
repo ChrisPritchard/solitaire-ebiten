@@ -8,6 +8,10 @@ type Card struct {
 	Suit, Value int
 }
 
+func (c Card) Equals(o Card) bool {
+	return c.Suit == o.Suit && c.Value == o.Value
+}
+
 type CardInfo struct {
 	Card
 	Pos     Vec2[int]
@@ -16,10 +20,19 @@ type CardInfo struct {
 
 var CU_per_card = Vec2[int]{4, 4}
 var Deck_CU = Vec2[int]{1, 1}
+var Pile_CUs = []Vec2[int]{
+	Vec2[int]{1, 2 + CU_per_card.Y},
+	Vec2[int]{2 + CU_per_card.X, 2 + CU_per_card.Y},
+	Vec2[int]{3 + 2*CU_per_card.X, 2 + CU_per_card.Y},
+	Vec2[int]{4 + 3*CU_per_card.X, 2 + CU_per_card.Y},
+	Vec2[int]{5 + 4*CU_per_card.X, 2 + CU_per_card.Y},
+	Vec2[int]{6 + 5*CU_per_card.X, 2 + CU_per_card.Y},
+	Vec2[int]{7 + 6*CU_per_card.X, 2 + CU_per_card.Y},
+}
 
 type SawayamaRules struct {
 	deck        []Card
-	deck_space  Card
+	deck_space  *Card
 	piles       [7][]Card
 	foundations [4][]Card
 	waste       []Card
@@ -82,13 +95,11 @@ func (r *SawayamaRules) Cards() []CardInfo {
 		res = append(res, CardInfo{Pos: Deck_CU, Visible: false})
 	}
 
-	pile_y := 2 + CU_per_card.Y
 	for i := range r.piles {
-		pile_x := 1 + i*CU_per_card.X + i
 		for j, c := range r.piles[i] {
 			res = append(res, CardInfo{
 				Card:    c,
-				Pos:     Vec2[int]{pile_x, pile_y + j},
+				Pos:     Pile_CUs[i].Add(0, j),
 				Visible: true})
 		}
 	}
@@ -96,9 +107,23 @@ func (r *SawayamaRules) Cards() []CardInfo {
 	return res
 }
 
-func (r *SawayamaRules) DraggableAt(point Vec2[int]) []*Card {
+func (r *SawayamaRules) DraggableAt(point Vec2[int]) []Card {
 	if Deck_CU.Contains(point, CU_per_card) {
 		return nil
+	}
+
+	for i, pile := range r.piles {
+		if len(pile) == 0 {
+			continue
+		}
+		if Pile_CUs[i].X <= point.X && Pile_CUs[i].X+CU_per_card.X >= point.X {
+			for j := len(pile) - 1; j >= 0; j-- {
+				cu := Pile_CUs[i].Add(0, j)
+				if cu.Contains(point, CU_per_card) {
+					return []Card{pile[j]}
+				}
+			}
+		}
 	}
 
 	// for i := len(r.Cards) - 1; i >= 0; i-- {
@@ -123,7 +148,7 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) []*Card {
 	return nil
 }
 
-func (r *SawayamaRules) DropAt(point Vec2[int], cards []*Card) {
+func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card) {
 	// for i, c := range slices.Backward(r.Cards) {
 	// 	if c.Pos.Contains(point, CU_per_card) {
 	// 		for _, d := range r.Cards[i:] {

@@ -11,7 +11,7 @@ type ImageData struct {
 }
 
 type drag_state struct {
-	card   *Card
+	card   Card
 	offset Vec2[float64]
 }
 
@@ -49,7 +49,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 		}
 	} else if !ts.Pressed && vm.dragged_cards != nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
-		cards := []*Card{}
+		cards := []Card{}
 		for _, c := range vm.dragged_cards {
 			cards = append(cards, c.card)
 		}
@@ -69,13 +69,13 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 		p := vm.card_units_to_pixels(c.Pos)
 		is_dragged := false
 
-		// for _, d := range vm.dragged_cards {
-		// 	if *d.card == c {
-		// 		p = p.Add2(vm.cursor.Subtract2(d.offset))
-		// 		is_dragged = true
-		// 		break
-		// 	}
-		// }
+		for _, d := range vm.dragged_cards {
+			if d.card.Equals(c.Card) {
+				p = p.Add2(vm.cursor.Subtract2(d.offset))
+				is_dragged = true
+				break
+			}
+		}
 
 		var image *ebiten.Image
 		if !c.Visible {
