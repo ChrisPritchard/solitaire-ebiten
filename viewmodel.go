@@ -7,58 +7,53 @@ import (
 
 type ImageData struct {
 	Image *ebiten.Image
-	X, Y  float64
+	Pos   Vec2[float64]
 }
 
 type drag_state struct {
-	card     *Card
-	offset_x float64
-	offset_y float64
+	card   *Card
+	offset Vec2[float64]
 }
 
 type ViewModel struct {
-	CardWidth, CardHeight float64
-	dragged_cards         []drag_state
-	cursor_x, cursor_y    float64
+	CardSize      Vec2[float64]
+	dragged_cards []drag_state
+	cursor        Vec2[float64]
 }
 
-func (vm *ViewModel) pixels_to_card_units(x, y float64) (int, int) {
-	cux := int(x / vm.CardWidth * CUX_per_card)
-	cuy := int(y / vm.CardHeight * CUY_per_card)
-	return cux, cuy
+func (vm *ViewModel) pixels_to_card_units(p Vec2[float64]) Vec2[int] {
+	return p.Divide(vm.CardSize).Scale(CU_per_card.ToFloat()).ToInt()
 }
 
-func (vm *ViewModel) card_units_to_pixels(cux, cuy int) (float64, float64) {
-	x := float64(cux) / CUX_per_card * vm.CardWidth
-	y := float64(cuy) / CUY_per_card * vm.CardHeight
-	return x, y
+func (vm *ViewModel) card_units_to_pixels(c Vec2[int]) Vec2[float64] {
+	return c.ToFloat().Divide(CU_per_card.ToFloat()).Scale(vm.CardSize)
 }
 
 func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 
-	vm.cursor_x = ts.X
-	vm.cursor_y = ts.Y
+	vm.cursor = ts.Pos
 
 	if ts.Pressed && vm.dragged_cards == nil {
-		cux, cuy := vm.pixels_to_card_units(ts.X, ts.Y)
+		cu := vm.pixels_to_card_units(ts.Pos)
 
-		cards := game.DraggableAt(cux, cuy)
+		cards := game.DraggableAt(cu)
+		if cards == nil {
+			return nil
+		}
 		vm.dragged_cards = []drag_state{}
 		for _, c := range cards {
 			vm.dragged_cards = append(vm.dragged_cards, drag_state{
-				card:     c,
-				offset_x: ts.X,
-				offset_y: ts.Y,
+				card:   c,
+				offset: ts.Pos,
 			})
 		}
 	} else if !ts.Pressed && vm.dragged_cards != nil {
-		cux, cuy := vm.pixels_to_card_units(ts.X, ts.Y)
+		cu := vm.pixels_to_card_units(ts.Pos)
 		head_card := vm.dragged_cards[0]
-		can_be_dropped, cux, cuy := game.DroppableAt(cux, cuy, head_card.card.Suit, head_card.card.Value)
+		can_be_dropped, cu := game.DroppableAt(cu, head_card.card.Suit, head_card.card.Value)
 		if can_be_dropped {
 			for i, d := range vm.dragged_cards {
-				(*d.card).CUX = cux
-				(*d.card).CUY = cuy + i
+				(*d.card).Pos = cu.Add(0, i)
 			}
 			game.Sort()
 		}
@@ -74,13 +69,12 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 	dragged := []ImageData{}
 
 	for _, c := range game.Cards {
-		x, y := vm.card_units_to_pixels(c.CUX, c.CUY)
+		p := vm.card_units_to_pixels(c.Pos)
 		is_dragged := false
 
 		for _, d := range vm.dragged_cards {
 			if *d.card == c {
-				x += float64(vm.cursor_x - d.offset_x)
-				y += float64(vm.cursor_y - d.offset_y)
+				p = p.Add2(vm.cursor.Subtract2(d.offset))
 				is_dragged = true
 				break
 			}
@@ -94,17 +88,9 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 		}
 
 		if is_dragged {
-			dragged = append(dragged, ImageData{
-				X:     x,
-				Y:     y,
-				Image: image,
-			})
+			dragged = append(dragged, ImageData{image, p})
 		} else {
-			res = append(res, ImageData{
-				X:     x,
-				Y:     y,
-				Image: image,
-			})
+			res = append(res, ImageData{image, p})
 		}
 	}
 

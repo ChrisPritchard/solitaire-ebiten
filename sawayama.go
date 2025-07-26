@@ -7,15 +7,13 @@ import (
 )
 
 type Card struct {
-	CUX, CUY    int
+	Pos         Vec2[int]
 	Suit, Value int
 	Visible     bool
 }
 
-const (
-	CUX_per_card = 4
-	CUY_per_card = 4
-)
+var CU_per_card = Vec2[int]{4, 4}
+var Deck_CU = Vec2[int]{1, 1}
 
 type SawayamaRules struct {
 	Cards []Card
@@ -33,7 +31,7 @@ func shuffle_deck() []Card {
 	for i := range 4 {
 		for j := range 13 {
 			cards = append(cards, Card{
-				CUX: 1, CUY: 1, // top-left deck position
+				Pos:  Deck_CU,
 				Suit: i, Value: j + 2,
 				Visible: false,
 			})
@@ -61,13 +59,12 @@ func initial_deal(shuffled []Card) []Card {
 	c := len(shuffled) - 1
 	res := []Card{}
 
-	pile_y := 2 + CUY_per_card
+	pile_y := 2 + CU_per_card.Y
 	for i := range 7 {
-		pile_x := 1 + i*CUX_per_card + i
+		pile_x := 1 + i*CU_per_card.X + i
 		for j := range i + 1 {
 			next := shuffled[c]
-			next.CUX = pile_x
-			next.CUY = pile_y + j
+			next.Pos = Vec2[int]{pile_x, pile_y + j}
 			next.Visible = true
 			res = append(res, next)
 			c--
@@ -81,55 +78,47 @@ func initial_deal(shuffled []Card) []Card {
 
 func (r *SawayamaRules) Sort() {
 	sort.Slice(r.Cards, func(i, j int) bool {
-		if r.Cards[i].CUX == r.Cards[j].CUX {
-			return r.Cards[i].CUY < r.Cards[j].CUY
-		} else {
-			return r.Cards[i].CUX < r.Cards[j].CUX
-		}
+		return r.Cards[i].Pos.Compare(r.Cards[j].Pos)
 	})
 }
 
-func (r *SawayamaRules) DraggableAt(cux, cuy int) []*Card {
+func (r *SawayamaRules) DraggableAt(point Vec2[int]) []*Card {
 	for i := len(r.Cards) - 1; i >= 0; i-- {
 		c := &r.Cards[i]
-		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
-			if cuy >= c.CUY && cuy <= c.CUY+CUY_per_card {
-				possible := []*Card{c}
-				next := c
-				for _, d := range r.Cards[i:] {
-					if d.CUX == c.CUX && d.CUY == next.CUY+1 {
-						if d.Value == next.Value-1 && d.Suit%2 != next.Suit%2 {
-							possible = append(possible, &d)
-							next = &d
-						} else {
-							return nil
-						}
+		if c.Pos.Contains(point, CU_per_card) {
+			possible := []*Card{c}
+			next := c
+			for _, d := range r.Cards[i:] {
+				if d.Pos.Equal(next.Pos.Add(0, 1)) {
+					if d.Value == next.Value-1 && d.Suit%2 != next.Suit%2 {
+						possible = append(possible, &d)
+						next = &d
+					} else {
+						return nil
 					}
 				}
-				return possible
 			}
+			return possible
 		}
 	}
 
 	return nil
 }
 
-func (r *SawayamaRules) DroppableAt(cux, cuy int, suit, value int) (bool, int, int) {
+func (r *SawayamaRules) DroppableAt(point Vec2[int], suit, value int) (bool, Vec2[int]) {
 	for i, c := range slices.Backward(r.Cards) {
-		if cux >= c.CUX && cux <= c.CUX+CUX_per_card {
-			if cuy >= c.CUY && cuy <= c.CUY+CUY_per_card {
-				for _, d := range r.Cards[i:] {
-					if d.CUX == c.CUX && d.CUY == c.CUY+1 {
-						return false, 0, 0 // not the top card, so can't drop here
-						// todo, account for foundations and free spaces
-					}
+		if c.Pos.Contains(point, CU_per_card) {
+			for _, d := range r.Cards[i:] {
+				if d.Pos.Equal(c.Pos.Add(0, 1)) {
+					return false, Vec2[int]{} // not the top card, so can't drop here
+					// todo, account for foundations and free spaces
 				}
-				return c.Suit%2 != suit%2 && c.Value == value+1, c.CUX, c.CUY + 1 // for piles
 			}
+			return c.Suit%2 != suit%2 && c.Value == value+1, c.Pos.Add(0, 1) // for piles
 		}
 	}
 
-	return false, 0, 0
+	return false, Vec2[int]{}
 }
 
 func (r *SawayamaRules) DrawFromDeck() bool {
