@@ -32,7 +32,7 @@ func (c Vec2[T]) Add(x, y T) Vec2[T] {
 }
 
 func (c Vec2[T]) Add2(o Vec2[T]) Vec2[T] {
-	return Vec2[T]{c.X + o.X, c.Y + o.Y}
+	return c.Add(o.X, o.Y)
 }
 
 func (c Vec2[T]) Subtract(x, y T) Vec2[T] {
@@ -40,7 +40,7 @@ func (c Vec2[T]) Subtract(x, y T) Vec2[T] {
 }
 
 func (c Vec2[T]) Subtract2(o Vec2[T]) Vec2[T] {
-	return Vec2[T]{c.X - o.X, c.Y - o.Y}
+	return c.Subtract(o.X, o.Y)
 }
 
 func (c Vec2[int]) ToFloat() Vec2[float64] {
