@@ -8,7 +8,7 @@ func (c Vec2[T]) Compare(o Vec2[T]) bool {
 	if c.X == o.X {
 		return c.Y < o.Y
 	}
-	return c.X < c.Y
+	return c.X < o.X
 }
 
 func (c Vec2[T]) Equal(o Vec2[T]) bool {
