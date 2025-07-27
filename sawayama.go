@@ -47,7 +47,7 @@ type SawayamaRules struct {
 	waste       []Card
 }
 
-func Setup() SawayamaRules {
+func NewGameSetup() SawayamaRules {
 	shuffled := shuffle_deck()
 	r := SawayamaRules{}
 	r.deck, r.piles = initial_deal(shuffled)

@@ -9,6 +9,8 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 )
 
 // Card images: first index is suit (0 hearts, 1 diamonds, 2 spades, 3 clubs) second is value from 2 to 14 (ace)
@@ -33,6 +35,9 @@ var background []byte
 var card_data []byte
 
 var card_size = image.Rect(0, 0, 36, 54)
+
+//go:embed Audio/card-place-1.ogg
+var card_place_1 []byte
 
 func rel(dx, dy int) image.Rectangle {
 	return card_size.Add(image.Pt(dx, dy))
@@ -106,13 +111,23 @@ var card_space = rel(12, 183)
 
 var reset_btn = image.Rect(0, 0, 36, 15).Add(image.Pt(386, 256))
 
+var Sounds map[int][]*audio.Player
+
 func init() {
+	load_background()
+	load_cards()
+	load_sounds()
+}
+
+func load_background() {
 	background_image, _, err := image.Decode(bytes.NewReader(background))
 	if err != nil {
 		log.Fatal(err)
 	}
 	Background = ebiten.NewImageFromImage(background_image)
+}
 
+func load_cards() {
 	cards_image, _, err := image.Decode(bytes.NewReader(card_data))
 	if err != nil {
 		log.Fatal(err)
@@ -130,5 +145,25 @@ func init() {
 		for val, rect := range v {
 			Cards[suit][val] = cards_image2.SubImage(rect).(*ebiten.Image)
 		}
+	}
+}
+
+func load_sounds() {
+	Sounds = make(map[int][]*audio.Player)
+
+	audioContext := audio.NewContext(48000)
+
+	s, err := vorbis.DecodeF32(bytes.NewReader(card_place_1))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	p, err := audioContext.NewPlayerF32(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	Sounds[0] = []*audio.Player{
+		p,
 	}
 }

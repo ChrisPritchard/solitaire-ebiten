@@ -43,7 +43,7 @@ func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Sawayama Solitaire")
 
-	game = Setup()
+	game = NewGameSetup()
 	view_model = ViewModel{CardSize: card_size}
 
 	if err := ebiten.RunGame(&game_loop{}); err != nil {
@@ -63,7 +63,7 @@ func (gl *game_loop) Update() error {
 	last_pressed = gl.pressed
 
 	if touchState.Pressed && touchState.JustChanged && reset_btn_loc.Contains(touchState.Pos, reset_btn_size) {
-		game = Setup()
+		game = NewGameSetup()
 		view_model = ViewModel{CardSize: card_size}
 	} else {
 		view_model.Update(touchState, &game)
