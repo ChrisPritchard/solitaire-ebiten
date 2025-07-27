@@ -180,7 +180,7 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 		}
 		if p.Add(0, len(r.piles[i])).Contains(point, CU_per_card) {
 			top_card := r.piles[i][len(r.piles[i])-1]
-			if cards[0].Value == top_card.Value+1 && cards[0].Suit%2 != top_card.Suit%2 {
+			if cards[0].Value == top_card.Value-1 && cards[0].Suit%2 != top_card.Suit%2 {
 				r.piles[i] = append(r.piles[i], cards...)
 				r.remove_from_origin(cards, origin_cu)
 				return
@@ -190,7 +190,19 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 }
 
 func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
+	if origin_cu.Equal(deck_cu) {
+		r.deck_space = nil
+	}
 
+	if origin_cu.Equal(waste_cu.Add(len(r.waste), 0)) {
+		r.waste = r.waste[:len(r.waste)-2]
+	}
+
+	for i := range pile_cus {
+		if origin_cu.X == pile_cus[i].X {
+			r.piles[i] = r.piles[i][:len(r.piles[i])-len(cards)]
+		}
+	}
 }
 
 func (r *SawayamaRules) DrawFromDeck() bool {
