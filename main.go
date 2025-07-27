@@ -56,7 +56,8 @@ func (gl *game_loop) Update() error {
 	touchState := TouchState{gl.pressed, gl.pressed != last_pressed, Vec2[int]{x, y}.ToFloat()}
 	last_pressed = gl.pressed
 
-	return view_model.Update(touchState, &game)
+	view_model.Update(touchState, &game)
+	return nil
 }
 
 func (*game_loop) Draw(screen *ebiten.Image) {

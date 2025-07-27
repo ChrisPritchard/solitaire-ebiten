@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"slices"
 )
 
 type Card struct {
@@ -19,8 +20,9 @@ type CardInfo struct {
 }
 
 var CU_per_card = Vec2[int]{4, 4}
-var deck_cu = Vec2[int]{2 + CU_per_card.X, 1}
-var waste_cu = deck_cu.Add(2*CU_per_card.X+3, 0)
+var Deck_CU = Vec2[int]{2 + CU_per_card.X, 1}
+
+var waste_cu = Deck_CU.Add(CU_per_card.X+1, 0)
 var pile_cus = []Vec2[int]{
 	{2 + CU_per_card.X, 2 + CU_per_card.Y},
 	{3 + 2*CU_per_card.X, 2 + CU_per_card.Y},
@@ -99,11 +101,15 @@ func (r *SawayamaRules) Cards() []CardInfo {
 	res := []CardInfo{}
 
 	if len(r.deck) > 0 {
-		res = append(res, CardInfo{Pos: deck_cu, Visible: false})
+		res = append(res, CardInfo{Pos: Deck_CU, Visible: false})
 	} else if r.deck_space != nil {
-		res = append(res, CardInfo{Card: *r.deck_space, Pos: deck_cu, Visible: true})
+		res = append(res, CardInfo{Card: *r.deck_space, Pos: Deck_CU, Visible: true})
 	} else {
-		res = append(res, CardInfo{Card: Card{}, Pos: deck_cu, Visible: true})
+		res = append(res, CardInfo{Card: Card{}, Pos: Deck_CU, Visible: true})
+	}
+
+	for i, c := range r.waste {
+		res = append(res, CardInfo{Card: c, Pos: waste_cu.Add(i, 0), Visible: true})
 	}
 
 	for i := range r.piles {
@@ -125,8 +131,8 @@ func (r *SawayamaRules) Cards() []CardInfo {
 
 func (r *SawayamaRules) DraggableAt(point Vec2[int]) ([]Card, Vec2[int]) {
 
-	if len(r.deck) == 0 && r.deck_space != nil && deck_cu.Contains(point, CU_per_card) {
-		return []Card{*r.deck_space}, deck_cu
+	if len(r.deck) == 0 && r.deck_space != nil && Deck_CU.Contains(point, CU_per_card) {
+		return []Card{*r.deck_space}, Deck_CU
 	}
 
 	if len(r.waste) > 0 && waste_cu.Add(len(r.waste)-1, 0).Contains(point, CU_per_card) {
@@ -154,7 +160,7 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) ([]Card, Vec2[int]) {
 }
 
 func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int]) {
-	if len(cards) == 1 && len(r.deck) == 0 && r.deck_space == nil && deck_cu.Contains(point, CU_per_card) {
+	if len(cards) == 1 && len(r.deck) == 0 && r.deck_space == nil && Deck_CU.Contains(point, CU_per_card) {
 		r.deck_space = &cards[0]
 		r.remove_from_origin(cards, origin_cu)
 		return
@@ -190,7 +196,7 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 }
 
 func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
-	if origin_cu.Equal(deck_cu) {
+	if origin_cu.Equal(Deck_CU) {
 		r.deck_space = nil
 	}
 
@@ -206,5 +212,20 @@ func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
 }
 
 func (r *SawayamaRules) DrawFromDeck() bool {
-	return false
+	if len(r.deck) == 0 {
+		return false
+	}
+
+	if len(r.deck) < 3 {
+		slices.Reverse(r.deck)
+		r.waste = append(r.waste, r.deck...)
+		r.deck = nil
+		return true
+	}
+
+	cards := r.deck[len(r.deck)-3:]
+	slices.Reverse(cards)
+	r.waste = append(r.waste, cards...)
+	r.deck = r.deck[:len(r.deck)-3]
+	return true
 }

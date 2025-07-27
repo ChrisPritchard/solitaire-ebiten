@@ -30,17 +30,21 @@ func (vm *ViewModel) card_units_to_pixels(c Vec2[int]) Vec2[float64] {
 	return c.ToFloat().Divide(CU_per_card.ToFloat()).Scale(vm.CardSize)
 }
 
-func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
+func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 
 	vm.cursor = ts.Pos
 
 	if ts.Pressed && ts.JustChanged && vm.dragged_cards == nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
+		if Deck_CU.Contains(cu, CU_per_card) && game.DrawFromDeck() {
+			return
+		}
+
 		cards, origin := game.DraggableAt(cu)
 		vm.drag_origin = origin
 		if cards == nil {
-			return nil
+			return
 		}
 		vm.dragged_cards = []drag_state{}
 		for _, c := range cards {
@@ -58,8 +62,6 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 		game.DropAt(cu, cards, vm.drag_origin)
 		vm.dragged_cards = nil
 	}
-
-	return nil
 }
 
 func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
