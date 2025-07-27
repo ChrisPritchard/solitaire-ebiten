@@ -31,10 +31,10 @@ var pile_cus = []Vec2[int]{
 	{8 + 7*CU_per_card.X, 2 + CU_per_card.Y},
 }
 var foundation_cus = []Vec2[int]{
+	{1, 1},
 	{1, 2 + CU_per_card.Y},
 	{1, 3 + 2*CU_per_card.Y},
 	{1, 4 + 3*CU_per_card.Y},
-	{1, 5 + 4*CU_per_card.Y},
 }
 
 type SawayamaRules struct {
