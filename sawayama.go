@@ -92,7 +92,7 @@ func initial_deal(shuffled []Card) ([]Card, [7][]Card) {
 		}
 	}
 
-	deck := shuffled[:c]
+	deck := shuffled[:c+1]
 
 	return deck, piles
 }
@@ -113,8 +113,12 @@ func (r *SawayamaRules) Cards() []CardInfo {
 	}
 
 	for i := range r.piles {
-		for j, c := range r.piles[i] {
-			res = append(res, CardInfo{Card: c, Pos: pile_cus[i].Add(0, j), Visible: true})
+		if len(r.piles[i]) == 0 {
+			res = append(res, CardInfo{Card: Card{}, Pos: pile_cus[i], Visible: true})
+		} else {
+			for j, c := range r.piles[i] {
+				res = append(res, CardInfo{Card: c, Pos: pile_cus[i].Add(0, j), Visible: true})
+			}
 		}
 	}
 
@@ -160,24 +164,37 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) ([]Card, Vec2[int]) {
 }
 
 func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int]) {
+	// deck space
 	if len(cards) == 1 && len(r.deck) == 0 && r.deck_space == nil && Deck_CU.Contains(point, CU_per_card) {
 		r.deck_space = &cards[0]
 		r.remove_from_origin(cards, origin_cu)
 		return
 	}
 
+	// foundations
 	if len(cards) == 1 {
 		for i, f := range foundation_cus {
 			if f.Contains(point, CU_per_card) {
-				if r.foundations[i] == nil && cards[0].Value == 14 { // ace
+				var top_card *Card = nil
+				if len(r.foundations[i]) != 0 {
+					top_card = &(r.foundations[i][len(r.foundations[i])-1])
+				}
+				if top_card == nil && cards[0].Value == 14 { // ace
 					r.foundations[i] = []Card{cards[0]}
 					r.remove_from_origin(cards, origin_cu)
 					return
+				} else if cards[0].Suit == top_card.Suit {
+					if (top_card.Value == 14 && cards[0].Value == 2) || (top_card.Value == cards[0].Value-1) {
+						r.foundations[i] = append(r.foundations[i], cards[0])
+						r.remove_from_origin(cards, origin_cu)
+						return
+					}
 				}
 			}
 		}
 	}
 
+	// piles
 	for i, p := range pile_cus {
 		if (len(r.piles[i]) == 0) && p.Contains(point, CU_per_card) {
 			r.piles[i] = cards
@@ -198,15 +215,18 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
 	if origin_cu.Equal(Deck_CU) {
 		r.deck_space = nil
+		return
 	}
 
-	if origin_cu.Equal(waste_cu.Add(len(r.waste), 0)) {
-		r.waste = r.waste[:len(r.waste)-2]
+	if origin_cu.Equal(waste_cu.Add(len(r.waste)-1, 0)) {
+		r.waste = r.waste[:len(r.waste)-1]
+		return
 	}
 
 	for i := range pile_cus {
 		if origin_cu.X == pile_cus[i].X {
 			r.piles[i] = r.piles[i][:len(r.piles[i])-len(cards)]
+			return
 		}
 	}
 }
