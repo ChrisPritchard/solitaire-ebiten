@@ -13,17 +13,6 @@ Four areas:
 
 The goal is to build up and complete all four foundations. Cards can be moved from anywhere except the foundations (which can only be moved to) and placed on a 1-higher card with an opposing colour, or in a free spot. A stack of cards can be moved by selecting the highest card that follows these rules for all lower cards. Finally, when the stock has been exhausted (all its cards used or in the waste) its spot can be used as a free cell for a single card.
 
-## Game Mechanics
-
-Building this was ultimately about trying ebiten and also building out a card management system
-
-- [ ] Face down card stacks
-- [ ] Face up, staggered card piles either vertical (for the tableau) or horizontal (for the waste)
-- [ ] Automatic card movement
-- [ ] Card flipping (as part of movement)
-- [ ] Magnet card placement
-- [ ] Touch friendly controls
-
 ## Asset credits
 
 Cards: [Pixel Art Cards by Glenn Dittman](https://opengameart.org/content/pixel-art-cards)
