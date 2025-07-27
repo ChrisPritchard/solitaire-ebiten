@@ -18,6 +18,12 @@ const (
 
 var card_size = Vec2[float64]{36. * cardScaling, 54. * cardScaling}
 
+var reset_btn_size = Vec2[float64]{
+	float64(assets.ResetBtn.Bounds().Dx() * cardScaling),
+	float64(assets.ResetBtn.Bounds().Dy() * cardScaling),
+}
+var reset_btn_loc = Vec2[float64]{screenWidth - reset_btn_size.X - 20, 20}
+
 type game_loop struct {
 	pressed bool
 }
@@ -56,12 +62,24 @@ func (gl *game_loop) Update() error {
 	touchState := TouchState{gl.pressed, gl.pressed != last_pressed, Vec2[int]{x, y}.ToFloat()}
 	last_pressed = gl.pressed
 
-	view_model.Update(touchState, &game)
+	if touchState.Pressed && touchState.JustChanged && reset_btn_loc.Contains(touchState.Pos, reset_btn_size) {
+		game = Setup()
+		view_model = ViewModel{CardSize: card_size}
+	} else {
+		view_model.Update(touchState, &game)
+	}
+
 	return nil
 }
 
 func (*game_loop) Draw(screen *ebiten.Image) {
 	screen.DrawImage(assets.Background, nil)
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(cardScaling, cardScaling)
+	op.GeoM.Translate(reset_btn_loc.X, reset_btn_loc.Y)
+	screen.DrawImage(assets.ResetBtn, op)
+
 	for _, image_data := range view_model.Transform(game) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(cardScaling, cardScaling)
