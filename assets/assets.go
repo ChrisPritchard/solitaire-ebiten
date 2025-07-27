@@ -17,6 +17,9 @@ var Cards map[int]map[int]*ebiten.Image
 // Card back image
 var CardBack *ebiten.Image
 
+// Card space image
+var CardSpace *ebiten.Image
+
 // Background image for the board
 var Background *ebiten.Image
 
@@ -96,6 +99,7 @@ var card_indexes = map[int]map[int]image.Rectangle{
 }
 
 var card_back = rel(12, 242)
+var card_space = rel(12, 183)
 
 func init() {
 	background_image, _, err := image.Decode(bytes.NewReader(background))
@@ -111,6 +115,7 @@ func init() {
 	cards_image2 := ebiten.NewImageFromImage(cards_image)
 
 	CardBack = cards_image2.SubImage(card_back).(*ebiten.Image)
+	CardSpace = cards_image2.SubImage(card_space).(*ebiten.Image)
 
 	Cards = make(map[int]map[int]*ebiten.Image)
 	for suit, v := range card_indexes {

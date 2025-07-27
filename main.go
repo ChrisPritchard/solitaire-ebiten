@@ -13,7 +13,7 @@ import (
 const (
 	screenWidth  = 640
 	screenHeight = 480
-	cardScaling  = 2
+	cardScaling  = 1
 )
 
 var card_size = Vec2[float64]{36. * cardScaling, 54. * cardScaling}

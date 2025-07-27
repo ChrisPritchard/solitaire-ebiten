@@ -18,6 +18,7 @@ type drag_state struct {
 type ViewModel struct {
 	CardSize      Vec2[float64]
 	dragged_cards []drag_state
+	drag_origin   Vec2[int]
 	cursor        Vec2[float64]
 }
 
@@ -36,7 +37,8 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 	if ts.Pressed && ts.JustChanged && vm.dragged_cards == nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
-		cards := game.DraggableAt(cu)
+		cards, origin := game.DraggableAt(cu)
+		vm.drag_origin = origin
 		if cards == nil {
 			return nil
 		}
@@ -53,7 +55,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) error {
 		for _, c := range vm.dragged_cards {
 			cards = append(cards, c.card)
 		}
-		game.DropAt(cu, cards)
+		game.DropAt(cu, cards, vm.drag_origin)
 		vm.dragged_cards = nil
 	}
 
@@ -80,8 +82,10 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 		var image *ebiten.Image
 		if !c.Visible {
 			image = assets.CardBack
-		} else {
+		} else if c.Value > 0 {
 			image = assets.Cards[c.Suit][c.Value]
+		} else {
+			image = assets.CardSpace // hackity hack hack
 		}
 
 		if is_dragged {

@@ -19,16 +19,22 @@ type CardInfo struct {
 }
 
 var CU_per_card = Vec2[int]{4, 4}
-var Deck_CU = Vec2[int]{1, 1}
-var Waste_CU = Deck_CU.Add(CU_per_card.X+1, 0)
-var Pile_CUs = []Vec2[int]{
-	{1, 2 + CU_per_card.Y},
+var deck_cu = Vec2[int]{2 + CU_per_card.X, 1}
+var waste_cu = deck_cu.Add(2*CU_per_card.X+3, 0)
+var pile_cus = []Vec2[int]{
 	{2 + CU_per_card.X, 2 + CU_per_card.Y},
 	{3 + 2*CU_per_card.X, 2 + CU_per_card.Y},
 	{4 + 3*CU_per_card.X, 2 + CU_per_card.Y},
 	{5 + 4*CU_per_card.X, 2 + CU_per_card.Y},
 	{6 + 5*CU_per_card.X, 2 + CU_per_card.Y},
 	{7 + 6*CU_per_card.X, 2 + CU_per_card.Y},
+	{8 + 7*CU_per_card.X, 2 + CU_per_card.Y},
+}
+var foundation_cus = []Vec2[int]{
+	{1, 2 + CU_per_card.Y},
+	{1, 3 + 2*CU_per_card.Y},
+	{1, 4 + 3*CU_per_card.Y},
+	{1, 5 + 4*CU_per_card.Y},
 }
 
 type SawayamaRules struct {
@@ -93,52 +99,69 @@ func (r *SawayamaRules) Cards() []CardInfo {
 	res := []CardInfo{}
 
 	if len(r.deck) > 0 {
-		res = append(res, CardInfo{Pos: Deck_CU, Visible: false})
+		res = append(res, CardInfo{Pos: deck_cu, Visible: false})
+	} else if r.deck_space != nil {
+		res = append(res, CardInfo{Card: *r.deck_space, Pos: deck_cu, Visible: true})
+	} else {
+		res = append(res, CardInfo{Card: Card{}, Pos: deck_cu, Visible: true})
 	}
 
 	for i := range r.piles {
 		for j, c := range r.piles[i] {
-			res = append(res, CardInfo{
-				Card:    c,
-				Pos:     Pile_CUs[i].Add(0, j),
-				Visible: true})
+			res = append(res, CardInfo{Card: c, Pos: pile_cus[i].Add(0, j), Visible: true})
+		}
+	}
+
+	for i, f := range r.foundations {
+		if len(f) != 0 {
+			res = append(res, CardInfo{Card: f[len(f)-1], Pos: foundation_cus[i], Visible: true})
+		} else {
+			res = append(res, CardInfo{Card: Card{}, Pos: foundation_cus[i], Visible: true})
 		}
 	}
 
 	return res
 }
 
-func (r *SawayamaRules) DraggableAt(point Vec2[int]) []Card {
+func (r *SawayamaRules) DraggableAt(point Vec2[int]) ([]Card, Vec2[int]) {
 
-	if len(r.deck) == 0 && r.deck_space != nil && Deck_CU.Contains(point, CU_per_card) {
-		return []Card{*r.deck_space}
+	if len(r.deck) == 0 && r.deck_space != nil && deck_cu.Contains(point, CU_per_card) {
+		return []Card{*r.deck_space}, deck_cu
 	}
 
-	if len(r.waste) > 0 && Waste_CU.Add(len(r.waste)-1, 0).Contains(point, CU_per_card) {
-		return []Card{r.waste[len(r.waste)-1]}
+	if len(r.waste) > 0 && waste_cu.Add(len(r.waste)-1, 0).Contains(point, CU_per_card) {
+		return []Card{r.waste[len(r.waste)-1]}, waste_cu.Add(len(r.waste)-1, 0)
 	}
 
 	for i, pile := range r.piles {
 		if len(pile) == 0 {
 			continue
 		}
-		if Pile_CUs[i].X <= point.X && Pile_CUs[i].X+CU_per_card.X >= point.X {
+		if pile_cus[i].X <= point.X && pile_cus[i].X+CU_per_card.X >= point.X {
 			for j := len(pile) - 1; j >= 0; j-- {
 				if j != len(pile)-1 && (pile[j].Value != pile[j+1].Value+1 || pile[j].Suit%2 == pile[j+1].Suit%2) {
-					return nil // stack isn't valid
+					return nil, Vec2[int]{} // stack isn't valid
 				}
-				cu := Pile_CUs[i].Add(0, j)
+				cu := pile_cus[i].Add(0, j)
 				if cu.Contains(point, CU_per_card) {
-					return pile[j:]
+					return pile[j:], pile_cus[i].Add(0, j)
 				}
 			}
 		}
 	}
 
-	return nil
+	return nil, Vec2[int]{}
 }
 
-func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card) {
+func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int]) {
+	if len(cards) == 1 && len(r.deck) == 0 && r.deck_space == nil && deck_cu.Contains(point, CU_per_card) {
+		r.deck_space = &cards[0]
+		r.remove_from_origin(cards, origin_cu)
+		return
+	}
+
+	//if len(cards) == 1 &&
+
 	// for i, c := range slices.Backward(r.Cards) {
 	// 	if c.Pos.Contains(point, CU_per_card) {
 	// 		for _, d := range r.Cards[i:] {
@@ -155,6 +178,10 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card) {
 	// 		return
 	// 	}
 	// }
+}
+
+func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
+
 }
 
 func (r *SawayamaRules) DrawFromDeck() bool {
