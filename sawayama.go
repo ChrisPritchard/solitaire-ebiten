@@ -160,24 +160,33 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 		return
 	}
 
-	//if len(cards) == 1 &&
+	if len(cards) == 1 {
+		for i, f := range foundation_cus {
+			if f.Contains(point, CU_per_card) {
+				if r.foundations[i] == nil && cards[0].Value == 14 { // ace
+					r.foundations[i] = []Card{cards[0]}
+					r.remove_from_origin(cards, origin_cu)
+					return
+				}
+			}
+		}
+	}
 
-	// for i, c := range slices.Backward(r.Cards) {
-	// 	if c.Pos.Contains(point, CU_per_card) {
-	// 		for _, d := range r.Cards[i:] {
-	// 			if d.Pos.Equal(c.Pos.Add(0, 1)) {
-	// 				return // not the top card, so can't drop here
-	// 				// todo, account for foundations and free spaces
-	// 			}
-	// 		}
-	// 		if c.Suit%2 != cards[0].Suit%2 && c.Value == cards[0].Value+1 {
-	// 			for i, d := range cards {
-	// 				d.Pos = c.Pos.Add(0, i+1)
-	// 			}
-	// 		}
-	// 		return
-	// 	}
-	// }
+	for i, p := range pile_cus {
+		if (len(r.piles[i]) == 0) && p.Contains(point, CU_per_card) {
+			r.piles[i] = cards
+			r.remove_from_origin(cards, origin_cu)
+			return
+		}
+		if p.Add(0, len(r.piles[i])).Contains(point, CU_per_card) {
+			top_card := r.piles[i][len(r.piles[i])-1]
+			if cards[0].Value == top_card.Value+1 && cards[0].Suit%2 != top_card.Suit%2 {
+				r.piles[i] = append(r.piles[i], cards...)
+				r.remove_from_origin(cards, origin_cu)
+				return
+			}
+		}
+	}
 }
 
 func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
