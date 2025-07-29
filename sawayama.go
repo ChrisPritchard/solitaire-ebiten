@@ -183,7 +183,7 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 					r.foundations[i] = []Card{cards[0]}
 					r.remove_from_origin(cards, origin_cu)
 					return
-				} else if cards[0].Suit == top_card.Suit {
+				} else if top_card != nil && cards[0].Suit == top_card.Suit {
 					if (top_card.Value == 14 && cards[0].Value == 2) || (top_card.Value == cards[0].Value-1) {
 						r.foundations[i] = append(r.foundations[i], cards[0])
 						r.remove_from_origin(cards, origin_cu)

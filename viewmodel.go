@@ -46,8 +46,6 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		if cards == nil {
 			return
 		}
-		assets.Sounds[0][0].Rewind()
-		assets.Sounds[0][0].Play()
 		vm.dragged_cards = []drag_state{}
 		for _, c := range cards {
 			vm.dragged_cards = append(vm.dragged_cards, drag_state{
@@ -62,6 +60,8 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 			cards = append(cards, c.card)
 		}
 		game.DropAt(cu, cards, vm.drag_origin)
+		assets.Sounds[0][0].Rewind()
+		assets.Sounds[0][0].Play()
 		vm.dragged_cards = nil
 	}
 }
