@@ -39,6 +39,12 @@ var card_size = image.Rect(0, 0, 36, 54)
 //go:embed Audio/card-place-1.ogg
 var card_place_1 []byte
 
+//go:embed Audio/card-slide-1.ogg
+var card_slide_1 []byte
+
+//go:embed Audio/card-slide-2.ogg
+var card_slide_2 []byte
+
 func rel(dx, dy int) image.Rectangle {
 	return card_size.Add(image.Pt(dx, dy))
 }
@@ -111,7 +117,7 @@ var card_space = rel(12, 183)
 
 var reset_btn = image.Rect(0, 0, 36, 15).Add(image.Pt(386, 256))
 
-var Sounds map[int][]*audio.Player
+var Sounds []*audio.Player
 
 func init() {
 	load_background()
@@ -149,21 +155,24 @@ func load_cards() {
 }
 
 func load_sounds() {
-	Sounds = make(map[int][]*audio.Player)
-
 	audioContext := audio.NewContext(48000)
 
-	s, err := vorbis.DecodeF32(bytes.NewReader(card_place_1))
-	if err != nil {
-		log.Fatal(err)
+	load_sound := func(b []byte) *audio.Player {
+		s, err := vorbis.DecodeF32(bytes.NewReader(b))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		p, err := audioContext.NewPlayerF32(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return p
 	}
 
-	p, err := audioContext.NewPlayerF32(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	Sounds[0] = []*audio.Player{
-		p,
+	Sounds = []*audio.Player{
+		load_sound(card_place_1),
+		load_sound(card_slide_1),
+		load_sound(card_slide_2),
 	}
 }

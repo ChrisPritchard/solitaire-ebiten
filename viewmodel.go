@@ -30,6 +30,11 @@ func (vm *ViewModel) card_units_to_pixels(c Vec2[int]) Vec2[float64] {
 	return c.ToFloat().Divide(CU_per_card.ToFloat()).Scale(vm.CardSize)
 }
 
+func play_sound(index int) {
+	assets.Sounds[index].Rewind()
+	assets.Sounds[index].Play()
+}
+
 func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 
 	vm.cursor = ts.Pos
@@ -38,6 +43,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
 		if Deck_CU.Contains(cu, CU_per_card) && game.DrawFromDeck() {
+			play_sound(0)
 			return
 		}
 
@@ -46,6 +52,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		if cards == nil {
 			return
 		}
+		play_sound(1)
 		vm.dragged_cards = []drag_state{}
 		for _, c := range cards {
 			vm.dragged_cards = append(vm.dragged_cards, drag_state{
@@ -59,9 +66,8 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		for _, c := range vm.dragged_cards {
 			cards = append(cards, c.card)
 		}
+		play_sound(2)
 		game.DropAt(cu, cards, vm.drag_origin)
-		assets.Sounds[0][0].Rewind()
-		assets.Sounds[0][0].Play()
 		vm.dragged_cards = nil
 	}
 }
