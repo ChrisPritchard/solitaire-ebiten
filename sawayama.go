@@ -266,6 +266,8 @@ func (r *SawayamaRules) NextStackable() *Stackable {
 					if tc.Suit == bc.Suit && (tc.Value == bc.Value-1 || tc.Value == 14 && bc.Value == 2) {
 						return &Stackable{bc, pile_cus[i].Add(0, len(p)-1), foundation_cus[j]}
 					}
+				} else if bc.Value == 14 {
+					return &Stackable{bc, pile_cus[i].Add(0, len(p)-1), foundation_cus[j]}
 				}
 			}
 		}

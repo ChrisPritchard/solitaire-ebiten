@@ -143,4 +143,6 @@ the game might be frozen (no additional actions) while a card is moving. the vie
 
 in terms of putting cards on the stack, the drag infra can be re-used. the view model would calculate what can be moved, initiate a drag state based on card positions, and initiate drops. it would need to use some sort of goroutine or stateful shift, though...
 
-how would this work, using dragging? dragging tracks teh card, and its offset which is the
+how would this work, using dragging? dragging tracks teh card, and its offset which is mouse position at drag start
+instead, we could set drag state to the moved stack card, and set the offset to the cu-to-pixel conversion of that card.
+we still need to track the destination cu, and the progress towards that destination. the progress might be used directly: calculate the dx, dy, apply the progress to those diffs, add to origin, and set card pixel position
