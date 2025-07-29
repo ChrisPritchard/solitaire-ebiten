@@ -257,20 +257,57 @@ type Stackable struct {
 }
 
 func (r *SawayamaRules) NextStackable() *Stackable {
+	var lfv = 14
+	for _, f := range r.foundations {
+		if len(f) > 0 {
+			tc := f[len(f)-1]
+			v := tc.Value
+			if v == 14 {
+				v = 1
+			}
+			if v < lfv {
+				lfv = tc.Value
+			}
+		} else {
+			lfv = 0
+		}
+	}
+	lfv += 1
+	if lfv == 1 {
+		lfv = 14
+	}
+
 	for i, p := range r.piles {
 		if len(p) > 0 {
 			bc := p[len(p)-1]
-			for j, f := range r.foundations {
-				if len(f) > 0 {
-					tc := f[len(f)-1]
-					if tc.Suit == bc.Suit && (tc.Value == bc.Value-1 || tc.Value == 14 && bc.Value == 2) {
+			if bc.Value == lfv {
+				for j, f := range r.foundations {
+					if len(f) > 0 {
+						tc := f[len(f)-1]
+						if tc.Suit == bc.Suit && (tc.Value == bc.Value-1 || tc.Value == 14 && bc.Value == 2) {
+							return &Stackable{bc, pile_cus[i].Add(0, len(p)-1), foundation_cus[j]}
+						}
+					} else if bc.Value == 14 {
 						return &Stackable{bc, pile_cus[i].Add(0, len(p)-1), foundation_cus[j]}
 					}
-				} else if bc.Value == 14 {
-					return &Stackable{bc, pile_cus[i].Add(0, len(p)-1), foundation_cus[j]}
 				}
 			}
 		}
 	}
+
+	if len(r.waste) > 0 && r.waste[len(r.waste)-1].Value == lfv {
+		wc := r.waste[len(r.waste)-1]
+		for j, f := range r.foundations {
+			if len(f) > 0 {
+				tc := f[len(f)-1]
+				if tc.Suit == wc.Suit && (tc.Value == wc.Value-1 || tc.Value == 14 && wc.Value == 2) {
+					return &Stackable{wc, waste_cu.Add(len(r.waste)-1, 0), foundation_cus[j]}
+				}
+			} else if wc.Value == 14 {
+				return &Stackable{wc, waste_cu.Add(len(r.waste)-1, 0), foundation_cus[j]}
+			}
+		}
+	}
+
 	return nil
 }
