@@ -109,7 +109,7 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 		is_moving := false
 
 		if vm.stacking != nil && vm.stacking.card.Equals(c.Card) {
-			p.Add2(vm.stacking.distance(vm))
+			p = p.Add2(vm.stacking.distance(vm))
 			is_moving = true
 		} else if vm.dragged_cards != nil {
 			for _, d := range vm.dragged_cards.cards {
