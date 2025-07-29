@@ -45,6 +45,11 @@ type ViewModel struct {
 	stacking      *stack_state
 }
 
+func NewViewModel(cardSize Vec2[float64]) ViewModel {
+	play_sound(3)
+	return ViewModel{CardSize: cardSize}
+}
+
 func (vm *ViewModel) pixels_to_card_units(p Vec2[float64]) Vec2[int] {
 	return p.Divide(vm.CardSize).Scale(CU_per_card.ToFloat()).ToInt()
 }

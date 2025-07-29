@@ -36,6 +36,9 @@ var card_data []byte
 
 var card_size = image.Rect(0, 0, 36, 54)
 
+//go:embed Audio/card-fan-1.ogg
+var card_fan_1 []byte
+
 //go:embed Audio/card-place-1.ogg
 var card_place_1 []byte
 
@@ -174,5 +177,6 @@ func load_sounds() {
 		load_sound(card_place_1),
 		load_sound(card_slide_1),
 		load_sound(card_slide_2),
+		load_sound(card_fan_1),
 	}
 }

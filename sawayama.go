@@ -114,9 +114,8 @@ func (r *SawayamaRules) Cards() []CardInfo {
 	}
 
 	for i := range r.piles {
-		if len(r.piles[i]) == 0 {
-			res = append(res, CardInfo{Card: Card{}, Pos: pile_cus[i], Visible: true})
-		} else {
+		res = append(res, CardInfo{Card: Card{}, Pos: pile_cus[i], Visible: true})
+		if len(r.piles[i]) != 0 {
 			for j, c := range r.piles[i] {
 				res = append(res, CardInfo{Card: c, Pos: pile_cus[i].Add(0, j), Visible: true})
 			}
