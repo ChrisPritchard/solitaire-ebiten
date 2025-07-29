@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/chrispritchard/solitaire-ebiten/assets"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -23,7 +25,18 @@ type stack_state struct {
 	progress    float64
 }
 
-var progress_per_dt = (1. / 60.) * 2 // 0.5 seconds to move a stacked item
+func (s stack_state) distance(vm *ViewModel) Vec2[float64] {
+	origin := vm.card_units_to_pixels(vm.stacking.origin)
+	dest := vm.card_units_to_pixels(vm.stacking.destination)
+	diff := dest.Subtract2(origin)
+	direct := math.Sqrt(diff.X*diff.X + diff.Y*diff.Y)
+	progress := direct * vm.stacking.progress
+	scale := progress / direct
+	curr := diff.Scale(Vec2[float64]{scale, scale})
+	return curr
+}
+
+var progress_per_dt = (1. / 60.) * 4
 
 type ViewModel struct {
 	CardSize      Vec2[float64]
@@ -96,11 +109,7 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 		is_moving := false
 
 		if vm.stacking != nil && vm.stacking.card.Equals(c.Card) {
-			o := vm.card_units_to_pixels(vm.stacking.origin)
-			d := vm.card_units_to_pixels(vm.stacking.destination)
-			diff := d.Subtract2(o)
-			curr := diff.Scale(Vec2[float64]{vm.stacking.progress, vm.stacking.progress})
-			p = p.Add2(curr)
+			p.Add2(vm.stacking.distance(vm))
 			is_moving = true
 		} else if vm.dragged_cards != nil {
 			for _, d := range vm.dragged_cards.cards {
