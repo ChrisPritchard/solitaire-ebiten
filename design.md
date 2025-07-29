@@ -130,3 +130,17 @@ when a pile is cleared, there is an empty space. also, when the deck is emptied.
 i think the deck should be its own thing, too. perhaps revisit splitting cards into their positions? the difficulty is how we shift cards between piles, or other sets like foundations. the view model directly manipulating it seems unwise.
 
 could change the dragging interaction, so instead of calling Droppable to see if cards can be dropped, just pass them to the game at the drop point and the game can handle updating them and such
+
+## card movement and end game
+
+So once you 'win', with your stacks all set, you need to currently manually move everything to the foundations which is painful. id like either a button or some game state detection that triggers an automatic stacking operation (and a final 'you win' banner)
+
+> automatic card movement might also be used during dealing.
+
+how would it work? I could just snap cards from deck to board, from board to foundations. this is what happens when the deck is clicked for the waste, right now. not super satisfying. how might an animation work?
+
+the game might be frozen (no additional actions) while a card is moving. the view model can use its drag infrastructure to make the move. but if the game triggers it, and immediately updates, what does that do?
+
+in terms of putting cards on the stack, the drag infra can be re-used. the view model would calculate what can be moved, initiate a drag state based on card positions, and initiate drops. it would need to use some sort of goroutine or stateful shift, though...
+
+how would this work, using dragging? dragging tracks teh card, and its offset which is the

@@ -249,3 +249,26 @@ func (r *SawayamaRules) DrawFromDeck() bool {
 	r.deck = r.deck[:len(r.deck)-3]
 	return true
 }
+
+type Stackable struct {
+	Card        Card
+	Origin      Vec2[int]
+	Destination Vec2[int]
+}
+
+func (r *SawayamaRules) NextStackable() *Stackable {
+	for i, p := range r.piles {
+		if len(p) > 0 {
+			bc := p[len(p)-1]
+			for j, f := range r.foundations {
+				if len(f) > 0 {
+					tc := f[len(f)-1]
+					if tc.Suit == bc.Suit && (tc.Value == bc.Value-1 || tc.Value == 14 && bc.Value == 2) {
+						return &Stackable{bc, pile_cus[i].Add(0, len(p)-1), foundation_cus[j]}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}

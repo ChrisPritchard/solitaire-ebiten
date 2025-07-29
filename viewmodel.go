@@ -11,15 +11,17 @@ type ImageData struct {
 }
 
 type drag_state struct {
-	card   Card
+	cards  []Card
 	offset Vec2[float64]
+	origin Vec2[int] // used to remove a dropped card from where it came from, if valid
 }
 
 type ViewModel struct {
-	CardSize      Vec2[float64]
-	dragged_cards []drag_state
-	drag_origin   Vec2[int]
-	cursor        Vec2[float64]
+	CardSize       Vec2[float64]
+	dragged_cards  *drag_state
+	cursor         Vec2[float64]
+	stacking       *Stackable
+	stack_progress float64
 }
 
 func (vm *ViewModel) pixels_to_card_units(p Vec2[float64]) Vec2[int] {
@@ -39,6 +41,15 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 
 	vm.cursor = ts.Pos
 
+	if vm.stacking != nil {
+
+		return
+	} else if stackable := game.NextStackable(); stackable != nil {
+		vm.stacking = stackable
+		vm.stack_progress = 0
+		return
+	}
+
 	if ts.Pressed && ts.JustChanged && vm.dragged_cards == nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
@@ -48,26 +59,16 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		}
 
 		cards, origin := game.DraggableAt(cu)
-		vm.drag_origin = origin
 		if cards == nil {
 			return
 		}
 		play_sound(1)
-		vm.dragged_cards = []drag_state{}
-		for _, c := range cards {
-			vm.dragged_cards = append(vm.dragged_cards, drag_state{
-				card:   c,
-				offset: ts.Pos,
-			})
-		}
+		offset := ts.Pos
+		vm.dragged_cards = &drag_state{cards, offset, origin}
 	} else if !ts.Pressed && vm.dragged_cards != nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
-		cards := []Card{}
-		for _, c := range vm.dragged_cards {
-			cards = append(cards, c.card)
-		}
 		play_sound(2)
-		game.DropAt(cu, cards, vm.drag_origin)
+		game.DropAt(cu, vm.dragged_cards.cards, vm.dragged_cards.origin)
 		vm.dragged_cards = nil
 	}
 }
@@ -81,11 +82,13 @@ func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
 		p := vm.card_units_to_pixels(c.Pos)
 		is_dragged := false
 
-		for _, d := range vm.dragged_cards {
-			if d.card.Equals(c.Card) {
-				p = p.Add2(vm.cursor.Subtract2(d.offset))
-				is_dragged = true
-				break
+		if vm.dragged_cards != nil {
+			for _, d := range vm.dragged_cards.cards {
+				if d.Equals(c.Card) {
+					p = p.Add2(vm.cursor.Subtract2(vm.dragged_cards.offset))
+					is_dragged = true
+					break
+				}
 			}
 		}
 
