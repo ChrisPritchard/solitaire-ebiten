@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"slices"
 )
@@ -196,12 +197,12 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 
 	// piles
 	for i, p := range pile_cus {
-		if (len(r.piles[i]) == 0) && p.Contains(point, CU_per_card) {
+		if len(r.piles[i]) == 0 && p.Contains(point, CU_per_card) {
 			r.piles[i] = cards
 			r.remove_from_origin(cards, origin_cu)
 			return
 		}
-		if p.Add(0, len(r.piles[i])).Contains(point, CU_per_card) {
+		if p.Add(0, len(r.piles[i])-1).Contains(point, CU_per_card) {
 			top_card := r.piles[i][len(r.piles[i])-1]
 			if cards[0].Value == top_card.Value-1 && cards[0].Suit%2 != top_card.Suit%2 {
 				r.piles[i] = append(r.piles[i], cards...)
@@ -229,6 +230,8 @@ func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {
 			return
 		}
 	}
+
+	log.Fatal("reached this point, shouldn't be possible")
 }
 
 func (r *SawayamaRules) DrawFromDeck() bool {
