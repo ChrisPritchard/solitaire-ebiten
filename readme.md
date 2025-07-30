@@ -29,3 +29,9 @@ done
 ```
 
 Though ultimately only 'card-suites.png' was needed.
+
+## Learnings (for me)
+
+Harder than expected, due to a 20/80, 80/20 sort of thing; getting the architecture right took most of the work. Progress on this can be seen in my stream of consciousness [design.md](./design.md)
+
+No AI was used for code generation, though I did use a little DeepSeek to figure out perculiarities in Go. Also in what might have been the most frustrating part, where I had a card-duplication bug that took me *hours* and *hours* to track down, as it wasn't consisted and required just continuously playing until it happened. In frustration I finally submitted the chunk of code where I had identified it happening to DeepSeek for help, and it told me about slices being reference types which was the problem :) Don't know why that was so hard for me, but thanks Chinese Supermind!

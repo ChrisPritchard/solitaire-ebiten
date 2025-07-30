@@ -146,3 +146,11 @@ in terms of putting cards on the stack, the drag infra can be re-used. the view 
 how would this work, using dragging? dragging tracks teh card, and its offset which is mouse position at drag start
 instead, we could set drag state to the moved stack card, and set the offset to the cu-to-pixel conversion of that card.
 we still need to track the destination cu, and the progress towards that destination. the progress might be used directly: calculate the dx, dy, apply the progress to those diffs, add to origin, and set card pixel position
+
+# release ideas
+
+pc, mac and android I think. lets see how easy this is
+
+mobile is not easy, it seems. can build the game into a shared library, but then you need the native tooling to package them  (e.g. into a apk for android). something to investigate, but maybe... not now? if i learn how to do it now, just as i have learned out to do it in the past, the knowledge will no doubt be obsolete by the time i need to do it again.
+
+pc and mac should be trivial though, and publisheable on github
