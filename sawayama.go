@@ -163,44 +163,7 @@ func (r *SawayamaRules) DraggableAt(point Vec2[int]) ([]Card, Vec2[int]) {
 	return nil, Vec2[int]{}
 }
 
-func (r *SawayamaRules) Test_for_dup(check string) {
-	dup_check := make(map[int]struct{})
-
-	var fail_test = func(c Card) {
-		if _, exists := dup_check[c.Suit*100+c.Value]; exists {
-			log.Fatalf("dup found during %s check", check)
-		}
-		dup_check[c.Suit*100+c.Value] = struct{}{}
-	}
-
-	if r.deck_space != nil {
-		fail_test(*r.deck_space)
-	}
-
-	for _, c := range r.deck {
-		fail_test(c)
-	}
-
-	for _, c := range r.waste {
-		fail_test(c)
-	}
-
-	for _, p := range r.piles {
-		for _, c := range p {
-			fail_test(c)
-		}
-	}
-
-	for _, f := range r.foundations {
-		for _, c := range f {
-			fail_test(c)
-		}
-	}
-}
-
 func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int]) {
-
-	r.Test_for_dup("start of drop")
 
 	// deck space
 	if len(cards) == 1 && len(r.deck) == 0 && r.deck_space == nil && Deck_CU.Contains(point, CU_per_card) {
@@ -208,8 +171,6 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 		r.remove_from_origin(cards, origin_cu)
 		return
 	}
-
-	r.Test_for_dup("post deck space drop")
 
 	// foundations
 	if len(cards) == 1 {
@@ -234,12 +195,10 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 		}
 	}
 
-	r.Test_for_dup("post foundation drop")
-
 	// piles
 	for i, p := range pile_cus {
 		if len(r.piles[i]) == 0 && p.Contains(point, CU_per_card) {
-			r.piles[i] = cards
+			r.piles[i] = append([]Card{}, cards...) // this bug took hours to fix - slices are reference types
 			r.remove_from_origin(cards, origin_cu)
 			return
 		}
@@ -252,8 +211,6 @@ func (r *SawayamaRules) DropAt(point Vec2[int], cards []Card, origin_cu Vec2[int
 			}
 		}
 	}
-
-	r.Test_for_dup("post pile drop")
 }
 
 func (r *SawayamaRules) remove_from_origin(cards []Card, origin_cu Vec2[int]) {

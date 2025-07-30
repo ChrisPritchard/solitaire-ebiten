@@ -67,8 +67,6 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 
 	vm.cursor = ts.Pos
 
-	game.Test_for_dup("before stacking")
-
 	if vm.stacking != nil {
 		vm.stacking.progress += progress_per_dt
 		if vm.stacking.progress >= 1. {
@@ -83,8 +81,6 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		return
 	}
 
-	game.Test_for_dup("after stacking, before dragged init")
-
 	if ts.Pressed && ts.JustChanged && vm.dragged_cards == nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
@@ -97,23 +93,18 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		if cards == nil {
 			return
 		}
-		play_sound(1)
 		offset := ts.Pos
 		vm.dragged_cards = &drag_state{cards, offset, origin}
-		game.Test_for_dup("post drag start")
+		play_sound(1)
 	} else if !ts.Pressed && vm.dragged_cards != nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
-		play_sound(2)
 		game.DropAt(cu, vm.dragged_cards.cards, vm.dragged_cards.origin)
 		vm.dragged_cards = nil
-		game.Test_for_dup("post drag drop")
+		play_sound(2)
 	}
 }
 
 func (vm *ViewModel) Transform(game SawayamaRules) []ImageData {
-
-	game.Test_for_dup("transform")
-
 	res := []ImageData{}
 	moving := []ImageData{}
 
