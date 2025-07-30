@@ -2,6 +2,11 @@
 
 Using [Sawayama rules](https://www.watsonbrosgames.com/solitaire/) by [Zachtronics](https://www.zachtronics.com/solitaire-collection/)
 
+Posts about this on my blog, [grislygrotto.nz](https://grislygrotto.nz):
+
+- [Artisanal, 28th June 2025](https://grislygrotto.nz/post/artisanal)
+- [Messy Conclusions, 31st June 2025](https://grislygrotto.nz/post/messy-conclusions)
+
 ## Rule Mechanics
 
 Four areas:
