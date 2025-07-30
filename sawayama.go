@@ -101,12 +101,11 @@ func initial_deal(shuffled []Card) ([]Card, [7][]Card) {
 func (r *SawayamaRules) Cards() []CardInfo {
 	res := []CardInfo{}
 
+	res = append(res, CardInfo{Card: Card{}, Pos: Deck_CU, Visible: true})
 	if len(r.deck) > 0 {
 		res = append(res, CardInfo{Pos: Deck_CU, Visible: false})
 	} else if r.deck_space != nil {
 		res = append(res, CardInfo{Card: *r.deck_space, Pos: Deck_CU, Visible: true})
-	} else {
-		res = append(res, CardInfo{Card: Card{}, Pos: Deck_CU, Visible: true})
 	}
 
 	for i, c := range r.waste {
@@ -260,30 +259,24 @@ type Stackable struct {
 }
 
 func (r *SawayamaRules) NextStackable() *Stackable {
-	var lfv = 14
+
+	lowest := []int{}
 	for _, f := range r.foundations {
-		if len(f) > 0 {
-			tc := f[len(f)-1]
-			v := tc.Value
-			if v == 14 {
-				v = 1
-			}
-			if v < lfv {
-				lfv = tc.Value
-			}
+		if len(f) <= 1 {
+			lowest = append(lowest, len(f)+1)
 		} else {
-			lfv = 0
+			lowest = append(lowest, f[len(f)-1].Value+1)
 		}
 	}
-	lfv += 1
-	if lfv == 1 {
-		lfv = 14
+	min := slices.Min(lowest)
+	if min == 1 {
+		min = 14 // aces
 	}
 
 	for i, p := range r.piles {
 		if len(p) > 0 {
 			bc := p[len(p)-1]
-			if bc.Value == lfv {
+			if bc.Value == min {
 				for j, f := range r.foundations {
 					if len(f) > 0 {
 						tc := f[len(f)-1]
@@ -298,7 +291,7 @@ func (r *SawayamaRules) NextStackable() *Stackable {
 		}
 	}
 
-	if len(r.waste) > 0 && r.waste[len(r.waste)-1].Value == lfv {
+	if len(r.waste) > 0 && r.waste[len(r.waste)-1].Value == min {
 		wc := r.waste[len(r.waste)-1]
 		for j, f := range r.foundations {
 			if len(f) > 0 {
