@@ -5,6 +5,7 @@ import (
 
 	"github.com/chrispritchard/solitaire-ebiten/assets"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 type ImageData struct {
@@ -46,7 +47,7 @@ type ViewModel struct {
 }
 
 func NewViewModel(cardSize Vec2[float64]) ViewModel {
-	play_sound(3)
+	play_sound(assets.Sounds.NewGame)
 	return ViewModel{CardSize: cardSize}
 }
 
@@ -58,9 +59,9 @@ func (vm *ViewModel) card_units_to_pixels(c Vec2[int]) Vec2[float64] {
 	return c.ToFloat().Divide(CU_per_card.ToFloat()).Scale(vm.CardSize)
 }
 
-func play_sound(index int) {
-	assets.Sounds[index].Rewind()
-	assets.Sounds[index].Play()
+func play_sound(p *audio.Player) {
+	p.Rewind()
+	p.Play()
 }
 
 func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
@@ -78,6 +79,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		vm.stacking = &stack_state{card: stackable.Card,
 			origin:      stackable.Origin,
 			destination: stackable.Destination}
+		play_sound(assets.Sounds.Stack)
 		return
 	}
 
@@ -85,7 +87,7 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		cu := vm.pixels_to_card_units(ts.Pos)
 
 		if Deck_CU.Contains(cu, CU_per_card) && game.DrawFromDeck() {
-			play_sound(0)
+			play_sound(assets.Sounds.DrawDeck)
 			return
 		}
 
@@ -95,12 +97,12 @@ func (vm *ViewModel) Update(ts TouchState, game *SawayamaRules) {
 		}
 		offset := ts.Pos
 		vm.dragged_cards = &drag_state{cards, offset, origin}
-		play_sound(1)
+		play_sound(assets.Sounds.DragStart)
 	} else if !ts.Pressed && vm.dragged_cards != nil {
 		cu := vm.pixels_to_card_units(ts.Pos)
 		game.DropAt(cu, vm.dragged_cards.cards, vm.dragged_cards.origin)
 		vm.dragged_cards = nil
-		play_sound(2)
+		play_sound(assets.Sounds.DragDrop)
 	}
 }
 

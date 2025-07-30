@@ -48,6 +48,9 @@ var card_slide_1 []byte
 //go:embed Audio/card-slide-2.ogg
 var card_slide_2 []byte
 
+//go:embed Audio/card-shove-3.ogg
+var card_shove_3 []byte
+
 func rel(dx, dy int) image.Rectangle {
 	return card_size.Add(image.Pt(dx, dy))
 }
@@ -120,7 +123,15 @@ var card_space = rel(12, 183)
 
 var reset_btn = image.Rect(0, 0, 36, 15).Add(image.Pt(386, 256))
 
-var Sounds []*audio.Player
+type SoundsGroup struct {
+	NewGame   *audio.Player
+	DragStart *audio.Player
+	DragDrop  *audio.Player
+	DrawDeck  *audio.Player
+	Stack     *audio.Player
+}
+
+var Sounds SoundsGroup
 
 func init() {
 	load_background()
@@ -173,10 +184,11 @@ func load_sounds() {
 		return p
 	}
 
-	Sounds = []*audio.Player{
-		load_sound(card_place_1),
-		load_sound(card_slide_1),
-		load_sound(card_slide_2),
-		load_sound(card_fan_1),
+	Sounds = SoundsGroup{
+		DragStart: load_sound(card_place_1),
+		DragDrop:  load_sound(card_slide_1),
+		DrawDeck:  load_sound(card_slide_2),
+		NewGame:   load_sound(card_fan_1),
+		Stack:     load_sound(card_shove_3),
 	}
 }
