@@ -1,5 +1,7 @@
 # Solitaire in Ebiten
 
+![](./image.png)
+
 Using [Sawayama rules](https://www.watsonbrosgames.com/solitaire/) by [Zachtronics](https://www.zachtronics.com/solitaire-collection/)
 
 Posts about this on my blog, [grislygrotto.nz](https://grislygrotto.nz):
