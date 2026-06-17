@@ -9,6 +9,8 @@ Posts about this on my blog, [grislygrotto.nz](https://grislygrotto.nz):
 - [Artisanal, 28th June 2025](https://grislygrotto.nz/post/artisanal)
 - [Messy Conclusions, 31st June 2025](https://grislygrotto.nz/post/messy-conclusions)
 
+> I have also rebuilt this more recently in [Godot](https://github.com/ChrisPritchard/solitaire-godot)
+
 ## Rule Mechanics
 
 Four areas:
